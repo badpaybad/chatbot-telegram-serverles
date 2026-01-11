@@ -59,6 +59,22 @@ All above run
 
               python program.py 
 
+                          INFO:     Waiting for application startup.
+                          🚀 Server đang khởi động, bắt đầu đăng ký Webhook...
+                          🛰️ Đang khởi tạo Cloudflare Tunnel...
+                          INFO:     Application startup complete.
+                          INFO:     Uvicorn running on http://0.0.0.0:8088 (Press CTRL+C to quit)
+                          INFO:     127.0.0.1:48778 - "GET / HTTP/1.1" 200 OK
+                          Server đã sẵn sàng trên port 8088!
+                          🔗 Đang gửi Webhook tới Telegram: https://may-allergy-codes-precious.trycloudflare.com/webhook
+                          Tunnel đang cần đăng ký: https://may-allergy-codes-precious.trycloudflare.com/webhook
+                          Telegram Response: {'ok': True, 'result': True, 'description': 'Webhook was set'}
+
+
+Chat with your chat bot :
+
+my sample chatbot: https://t.me/dunp_assitant_bot
+
 # 5. ollama 
 
               If dont want gemini can use ollama  local 

@@ -29,6 +29,7 @@ Chữ tâm kia mới thấm vào lòng nhau."
 # Khởi tạo client cấp thấp với API Key của bạn
 client = genai.Client(api_key=GEMINI_APIKEY)
 
+
 def get_stock_price(symbol: str):
     """Lấy giá cổ phiếu hiện tại của một công ty.
 
@@ -39,24 +40,30 @@ def get_stock_price(symbol: str):
     print(f"--- Đang kiểm tra giá cho mã: {symbol} ---")
     return {"symbol": symbol, "price": 150.0, "currency": "USD"}
 
+
 # Khai báo công cụ Google Search
 tools = [
     types.Tool(
         google_search=types.GoogleSearch()
     ),
-    get_stock_price
+    # get_stock_price
 ]
 
 # Cấu hình sinh nội dung
 generation_config = types.GenerateContentConfig(
     temperature=0.7,  # Độ sáng tạo vừa phải để giữ đúng vần luật,
     system_instruction=system_instruction,
-    # tool_config=types.ToolConfig(tools=tools,
-    #                              function_calling_config=types.FunctionCallingConfig(
-    #                                  mode="AUTO"
-    #                              ),
-    #                             #  retrieval_config=
-    #                              ),
+    tools=tools,
+    tool_config=types.ToolConfig(
+        function_calling_config=types.FunctionCallingConfig(
+            mode="AUTO"
+        ),
+        # 
+        # retrieval_config={
+        #     "lat_lng": {"latitude": 21.0285, "longitude": 105.8542},  # Hà Nội
+        #     "language_code": "vi"
+        # }
+    ),
 
 )
 
@@ -116,7 +123,7 @@ def chat_voi_cu_nguyen_du(user_input, history: list = None):
         contents=[user_input]
     )
 
-    bot_reply = response.text   
+    bot_reply = response.text
     print(f"bot_reply: {len(history)}")
     print(bot_reply)
     return bot_reply, history

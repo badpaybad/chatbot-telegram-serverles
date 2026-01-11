@@ -130,7 +130,7 @@ async def register_webhook():
     # Lệnh này sẽ trả về URL có dạng https://xxx.trycloudflare.com
     webhook_url = f"{webhook_base_url}/webhook"
 
-    print(f"Tunnel đang cần đăng ký: {webhook_url}")
+    print(f"Webhook đang cần đăng ký: {webhook_url}")
 
     async with httpx.AsyncClient() as client:
         response = await client.get(
@@ -141,7 +141,7 @@ async def register_webhook():
         if response.status_code != 200:
             raise Exception("Không đăng ký webhook cho telegram được")
 
-    print(f"Tunnel đang chạy: {webhook_url}")
+    print(f"Webhook đang chạy: {webhook_url}")
     # Lưu ý: Khi dùng cách này, tunnel sẽ chạy song song với ứng dụng của bạn.
 
 
@@ -261,24 +261,42 @@ async def handle_webhook(request: Request):
 
     # 2. Kiểm tra nếu tin nhắn có chứa nội dung và có tag tên bot
     # Cách đơn giản: Kiểm tra text có chứa @robotnotification_bot không
-    if user_text and TELEGRAM_BOT_USERNAME in user_text:
-        # Xóa tên bot khỏi nội dung để lấy phần câu hỏi thực tế
-        clean_message = user_text.replace(TELEGRAM_BOT_USERNAME, "").strip()
+    # if user_text and TELEGRAM_BOT_USERNAME in user_text:
+    #     # Xóa tên bot khỏi nội dung để lấy phần câu hỏi thực tế
+    #     clean_message = user_text.replace(TELEGRAM_BOT_USERNAME, "").strip()
 
-        # Lấy lịch sử cho chat_id này
-        history = list(chat_history[chat_id])
+    #     # Lấy lịch sử cho chat_id này
+    #     history = list(chat_history[chat_id])
 
-        # Gọi AI với lịch sử
-        reply_text, history1 = chat_voi_cu_nguyen_du_memory(
-            clean_message, history=history)
+    #     # Gọi AI với lịch sử
+    #     reply_text, history1 = chat_voi_cu_nguyen_du_memory(
+    #         clean_message, history=history)
 
-        # Cập nhật lịch sử
-        chat_history[chat_id].append(
-            {"role": "user", "parts": [clean_message]})
-        chat_history[chat_id].append({"role": "model", "parts": [reply_text]})
+    #     # Cập nhật lịch sử
+    #     chat_history[chat_id].append(
+    #         {"role": "user", "parts": [clean_message]})
+    #     chat_history[chat_id].append({"role": "model", "parts": [reply_text]})
 
-        # Gọi hàm gửi tin (dùng await để không chặn server)
-        await send_telegram_message(chat_id, reply_text)
+    #     # Gọi hàm gửi tin (dùng await để không chặn server)
+    #     await send_telegram_message(chat_id, reply_text)
+
+    # https://t.me/dunp_assitant_bot chat with your chatbot  
+    clean_message = user_text.replace(TELEGRAM_BOT_USERNAME, "").strip()
+
+    # Lấy lịch sử cho chat_id này
+    history = list(chat_history[chat_id])
+
+    # Gọi AI với lịch sử
+    reply_text, history1 = chat_voi_cu_nguyen_du_memory(
+        clean_message, history=history)
+
+    # Cập nhật lịch sử
+    chat_history[chat_id].append(
+        {"role": "user", "parts": [clean_message]})
+    chat_history[chat_id].append({"role": "model", "parts": [reply_text]})
+
+    # Gọi hàm gửi tin (dùng await để không chặn server)
+    await send_telegram_message(chat_id, reply_text)
 
     return {"status": "ok"}
 
