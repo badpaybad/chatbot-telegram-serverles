@@ -38,7 +38,7 @@ All above run
           # 3. Kiểm tra xem cài được chưa
           cloudflared --version
 
-          # 4. Tạo tunnel , sẽ dùng subproces python chạy cmd khi start app
+          # 4. Tạo tunnel , sẽ dùng subproces python chạy cmd khi start app, bạn ko cần chạy tay 
           cloudflared tunnel --url http://localhost:8088
 
 # 3. coding 
