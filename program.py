@@ -16,8 +16,10 @@ from google import genai
 from google.genai import types
 from gemini_truyenkieu import chat_voi_cu_nguyen_du, chat_voi_cu_nguyen_du_memory
 
-from config import TELEGRAM_BOT_TOKEN, TELEGRAM_API_URL, PORT, TELEGRAM_BOT_CHATID, TELEGRAM_BOT_USERNAME, GEMINI_APIKEY, DISCORD_PUBKEY, DISCORD_APPID, DISCORD_TOKEN
+from config import TELEGRAM_BOT_TOKEN, TELEGRAM_API_URL, PORT, TELEGRAM_BOT_CHATID, TELEGRAM_BOT_USERNAME, GEMINI_APIKEY, DISCORD_PUBKEY, DISCORD_APPID, DISCORD_TOKEN,  TELEGRAM_API_ID, TELEGRAM_API_HASH
 
+
+import my_telethon 
 # --- CẤU HÌNH ---
 
 # Biến toàn cục để quản lý tiến trình tunnel
@@ -57,7 +59,7 @@ async def wait_for_server_ready(url: str, timeout: int = 30):
                 pass
 
             if (asyncio.get_event_loop().time() - start_time) > timeout:
-                print("❌ Quá thời gian chờ server khởi động.")
+                print("Quá thời gian chờ server khởi động.")
                 return False
 
 """
@@ -81,7 +83,7 @@ async def background_tunnel_and_webhook():
     global webhook_base_url
 
     # 1. Khởi động Cloudflared
-    print("🛰️ Đang khởi tạo Cloudflare Tunnel...")
+    print("Đang khởi tạo Cloudflare Tunnel...")
     tunnel_process = subprocess.Popen(
         ["cloudflared", "tunnel", "--url",
             f"http://localhost:{PORT}", "--no-autoupdate"],
@@ -101,14 +103,14 @@ async def background_tunnel_and_webhook():
         await asyncio.sleep(0.1)
 
     if not webhook_base_url:
-        print("❌ Không lấy được URL từ Cloudflare")
+        print("Không lấy được URL từ Cloudflare")
         return
 
     # 3. Đợi cho đến khi port 8088 thông (FastAPI đã boot xong)
     if await wait_for_server_ready(webhook_base_url):
         # 4. Cuối cùng mới đăng ký với Telegram
         full_url = f"{webhook_base_url}/webhook"
-        print(f"🔗 Đang gửi Webhook tới Telegram: {full_url}")
+        print(f"Đang gửi Webhook tới Telegram: {full_url}")
 
         await asyncio.sleep(5)
         # await register_webhook_to_telegram(full_url)
@@ -116,7 +118,7 @@ async def background_tunnel_and_webhook():
         # await update_discord_endpoint(webhook_base_url)
 
         await asyncio.sleep(2)
-        if TELEGRAM_BOT_CHATID is not None and TELEGRAM_BOT_CHATID != "":
+        if TELEGRAM_BOT_CHATID is not None and TELEGRAM_BOT_CHATID != "" and TELEGRAM_BOT_CHATID !=0:
             await send_telegram_message(TELEGRAM_BOT_CHATID, webhook_base_url)
 
 
@@ -167,30 +169,34 @@ async def update_discord_endpoint(new_tunnel_url: str):
         try:
             response = await client.patch(api_url, json=payload, headers=headers)
             if response.status_code == 200:
-                print(f"✅ Discord Endpoint updated to: {full_url}")
+                print(f"Discord Endpoint updated to: {full_url}")
             else:
                 print(
                     f"❌ Discord Update Failed: {response.status_code} - {response.text}")
         except Exception as e:
-            print(f"⚠️ Error updating Discord: {e}")
+            print(f"Error updating Discord: {e}")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 
-    print("🚀 Server đang khởi động, bắt đầu đăng ký Webhook...")
+    print("Server đang khởi động, bắt đầu đăng ký Webhook...")
     asyncio.create_task(background_tunnel_and_webhook())
+
+    if  TELEGRAM_API_ID is not None and TELEGRAM_API_ID !="" and TELEGRAM_API_HASH is not None and TELEGRAM_API_HASH != "": 
+        # https://my.telegram.org/apps  nếu muốn nhận tất cả tin nhắn từ các nhóm mà bạn tham gia 
+        asyncio.create_task(my_telethon.run_until_disconnected())
 
     yield  # Sau từ khóa yield là nơi server đang chạy
 
     # --- Chạy khi SERVER TẮT ---
     print("Shutting down...")
     # --- TẮT SERVER ---
-    print("🛑 Đang đóng Tunnel...")
+    print("Đang đóng Tunnel...")
     if tunnel_process:
         tunnel_process.terminate()
         tunnel_process.wait()
-    print("👋 Server đã tắt hoàn toàn.")
+    print("Server đã tắt hoàn toàn.")
 
 app = FastAPI(lifespan=lifespan)
 
@@ -245,7 +251,7 @@ async def handle_webhook(request: Request):
     time_diff = current_time - message_time
 
     if time_diff > 60*60*60:
-        print(f"⏳ Bỏ qua tin nhắn cũ ({int(time_diff)} giây trước)")
+        print(f"Bỏ qua tin nhắn cũ ({int(time_diff)} giây trước)")
         return {"status": "ignored", "reason": "Message too old"}
 
     chat_id = update.message.chat.id
@@ -253,11 +259,11 @@ async def handle_webhook(request: Request):
 
     # 2. Kiểm tra Whitelist (Bảo mật)
     if len(ALLOWED_IDS) > 0 and chat_id not in ALLOWED_IDS:
-        print(f"⛔ Blocked ID: {chat_id}")
+        print(f"Blocked ID: {chat_id}")
         return {"status": "ignored", "reason": "Unauthorized"}
 
     # 3. Xử lý Logic
-    print(f"📩 Nhận tin từ {chat_id}: {user_text}")
+    print(f"Nhận tin từ {chat_id}: {user_text}")
 
     # 2. Kiểm tra nếu tin nhắn có chứa nội dung và có tag tên bot
     # Cách đơn giản: Kiểm tra text có chứa @robotnotification_bot không
@@ -366,6 +372,9 @@ async def discord_interactions(request: Request):
     return {"status": "ok"}
 
 # Đoạn này để chạy trực tiếp bằng python main.py (hoặc dùng lệnh uvicorn ở ngoài)
+
+
+
 if __name__ == "__main__":
     uvicorn.run("program:app", host="0.0.0.0", port=PORT, reload=False)
 

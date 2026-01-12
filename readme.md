@@ -55,7 +55,7 @@ All above run
 
 
               pip install --upgrade pip
-              pip install fastapi uvicorn pydantic httpx pynacl google-genai
+              pip install fastapi uvicorn pydantic httpx pynacl google-genai telethon
 
               python program.py 
 
