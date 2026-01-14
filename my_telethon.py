@@ -13,7 +13,6 @@ session_name = "dunp-assitant-account-id-v1"
 # Hoặc nếu bạn muốn tạo mới hoàn toàn (nhưng sẽ phải login lại liên tục)
 # session_name = str(uuid.uuid4())
 
-client = TelegramClient(session_name, TELEGRAM_API_ID, TELEGRAM_API_HASH)
 
 group_cache = {}
 
@@ -43,36 +42,6 @@ async def send_to_saved_messages(summary_text):
     except Exception as e:
         print(f"❌ Lỗi khi gửi tin nhắn: {e}")
 
-
-@client.on(events.NewMessage)
-async def handler(event):
-    # print("event===========================")
-    # print(event)
-    # print("event===========================")
-    chat_events["all"] = event
-
-    if event.is_group:
-        if event.chat_id not in group_cache:
-            chat = await event.get_chat()
-            group_cache[event.chat_id] = chat
-            # chat_groups[event.chat_id].title
-
-        print(
-            f"Tin nhắn mới từ: {group_cache[event.chat_id].title} (ID: {event.chat_id})")
-        group_messages[event.chat_id].append(event)
-
-    # 2. TRƯỜNG HỢP CÁ NHÂN NHẮN CHO MÌNH (Inbox)
-    elif event.is_private:
-        # event.out = False nghĩa là tin nhắn từ người khác gửi đến mình
-        if not event.out:
-            if event.chat_id not in user_cache:
-                user_cache[event.chat_id] = await event.get_chat()
-
-            # sender = user_cache[event.chat_id]
-            # print(f"Người dùng [{sender.first_name}]: {event.raw_text}")
-            user_messages[event.chat_id].append(event)
-
-    # Logic tóm tắt sẽ được chạy trong một task riêng biệt
 
 
 async def periodic_summary():
@@ -151,6 +120,39 @@ async def periodic_summary():
 
 
 async def run_until_disconnected():
+    
+
+    client = TelegramClient(session_name, TELEGRAM_API_ID, TELEGRAM_API_HASH)
+    @client.on(events.NewMessage)
+    async def handler(event):
+        # print("event===========================")
+        # print(event)
+        # print("event===========================")
+        chat_events["all"] = event
+
+        if event.is_group:
+            if event.chat_id not in group_cache:
+                chat = await event.get_chat()
+                group_cache[event.chat_id] = chat
+                # chat_groups[event.chat_id].title
+
+            print(
+                f"Tin nhắn mới từ: {group_cache[event.chat_id].title} (ID: {event.chat_id})")
+            group_messages[event.chat_id].append(event)
+
+        # 2. TRƯỜNG HỢP CÁ NHÂN NHẮN CHO MÌNH (Inbox)
+        elif event.is_private:
+            # event.out = False nghĩa là tin nhắn từ người khác gửi đến mình
+            if not event.out:
+                if event.chat_id not in user_cache:
+                    user_cache[event.chat_id] = await event.get_chat()
+
+                # sender = user_cache[event.chat_id]
+                # print(f"Người dùng [{sender.first_name}]: {event.raw_text}")
+                user_messages[event.chat_id].append(event)
+
+        # Logic tóm tắt sẽ được chạy trong một task riêng biệt
+
 
     print("telethon start, you will get summary interval 5 minutes in Saved messageses ...")
     await client.start()

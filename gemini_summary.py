@@ -23,13 +23,13 @@ client = genai.Client(api_key=GEMINI_APIKEY)
 # Khai báo công cụ Google Search
 tools = [
     types.Tool(
-        # google_search=types.GoogleSearch()
-        google_search_retrieval=types.GoogleSearchRetrieval(
-            dynamic_retrieval_config=types.DynamicRetrievalConfig(
-                mode=types.DynamicRetrievalConfigMode.MODE_DYNAMIC,
-                dynamic_threshold=0.6  # AI tự quyết định có tìm hay không
-            )
-        )
+        google_search=types.GoogleSearch()
+        # google_search_retrieval=types.GoogleSearchRetrieval(
+        #     dynamic_retrieval_config=types.DynamicRetrievalConfig(
+        #         mode=types.DynamicRetrievalConfigMode.MODE_DYNAMIC,
+        #         dynamic_threshold=0.6  # AI tự quyết định có tìm hay không
+        #     )
+        # )
     ),
 ]
 
