@@ -58,7 +58,7 @@ generation_config = types.GenerateContentConfig(
     #     function_calling_config=types.FunctionCallingConfig(
     #         mode="AUTO"
     #     ),
-    #     # 
+    #     #
     #     # retrieval_config={
     #     #     "lat_lng": {"latitude": 21.0285, "longitude": 105.8542},  # Hà Nội
     #     #     "language_code": "vi"
@@ -117,6 +117,7 @@ def chat_voi_cu_nguyen_du(user_input, history: list = None):
     response = client.models.generate_content(
         model=GEMINI_MODEL,  # Hoặc gemini-1.5-flash
         config=types.GenerateContentConfig(
+            tools=tools,
             system_instruction=system_instruction,
             temperature=0.7,  # Độ sáng tạo vừa phải để giữ đúng vần luật
         ),

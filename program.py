@@ -220,7 +220,7 @@ async def handle_webhook(request: Request):
     history = list(chat_history[chat_id])
 
     # Gọi AI với lịch sử
-    reply_text, history1 = chat_voi_cu_nguyen_du_memory(
+    reply_text, history1 = chat_voi_cu_nguyen_du(
         clean_message, history=history)
 
     # Cập nhật lịch sử
@@ -280,7 +280,7 @@ async def discord_interactions(request: Request):
         history = list(chat_history[chat_id])
 
         # Gọi hàm AI của bạn
-        bot_reply, history1 = chat_voi_cu_nguyen_du_memory(
+        bot_reply, history1 = chat_voi_cu_nguyen_du(
             user_input, history=history)
 
         # Cập nhật lịch sử
