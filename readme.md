@@ -96,3 +96,9 @@ my sample chatbot: https://t.me/dunp_assitant_bot
             TELEGRAM_API_ID=""
             TELEGRAM_API_HASH="" 
 
+
+# pyautogui
+
+Dùng để lấy thông tin trên màn hình = OCR 
+
+            pip install pyautogui pillow opencv-python easyocr
