@@ -2,3 +2,6 @@ venv
 __pycache__
 config.py
 dunp-assitant-account-id-v1.session
+config.dunp.py
+config_dunp.py
+zalo_group_0.png

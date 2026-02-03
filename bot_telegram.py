@@ -1,4 +1,4 @@
-from config import TELEGRAM_BOT_TOKEN, TELEGRAM_API_URL, PORT, TELEGRAM_BOT_CHATID, TELEGRAM_BOT_USERNAME, GEMINI_APIKEY, DISCORD_PUBKEY, DISCORD_APPID, DISCORD_TOKEN,  TELEGRAM_API_ID, TELEGRAM_API_HASH
+from config import TELEGRAM_BOT_TOKEN, TELEGRAM_API_URL, PORT, TELEGRAM_BOT_CHATID, TELEGRAM_BOT_USERNAME, GEMINI_APIKEY, GEMINI_MODEL, DISCORD_PUBKEY, DISCORD_APPID, DISCORD_TOKEN,  TELEGRAM_API_ID, TELEGRAM_API_HASH
 
 
 import re
@@ -16,7 +16,7 @@ async def send_telegram_message(chat_id: int, text: str):
             print(f"Lỗi khi gửi tin: {e}")
 
 
-async def register_webhook(webhook_base_url:str):
+async def register_webhook(webhook_base_url: str):
     # 1. Khởi tạo tunnel tới cổng 8088
     if not webhook_base_url:
         print(f"Không lấy được webhook_url")

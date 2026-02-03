@@ -3,8 +3,6 @@ from google.genai import types
 
 from config import GEMINI_APIKEY, GEMINI_MODEL
 
-# --- CẤU HÌNH ---
-
 
 # Định nghĩa phong cách của Nguyễn Du qua System Instruction
 system_instruction = """

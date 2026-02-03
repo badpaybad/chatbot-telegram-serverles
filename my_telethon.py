@@ -41,42 +41,57 @@ async def run_until_disconnected():
     global client
 
     client = TelegramClient(session_name, TELEGRAM_API_ID, TELEGRAM_API_HASH)
-
+    """
+    Class Sự kiện	Ý nghĩa
+events.NewMessage	Có tin nhắn mới được gửi đến.
+events.MessageEdited	Một tin nhắn cũ bị thay đổi nội dung.
+events.MessageDeleted	Một hoặc nhiều tin nhắn bị xóa.
+events.ChatAction	Các thay đổi trong nhóm (vào/ra, ghim bài, đổi tên nhóm).
+events.UserUpdate	Trạng thái người dùng (Online, Offline, Last Seen).
+events.CallbackQuery	Khi người dùng nhấn vào các nút (Inline Buttons) của Bot
+    """
+    # @client.on(events.UserUpdate)
+    # @client.on(events.ChatAction)
+    @client.on(events.MessageDeleted)
+    @client.on(events.MessageEdited)
     @client.on(events.NewMessage)
+    # @client.on(events.CallbackQuery)
     async def handler(event):
-        # print("event===========================")
-        # print(event)
-        # print("event===========================")
-        chat_events["all"] = event
+        print("event===========================")
+        print(event)
+        print("event===========================")
+        # chat_events["all"] = event
 
-        if event.is_group:
-            if event.chat_id not in group_cache:
-                chat = await event.get_chat()
-                group_cache[event.chat_id] = chat
-                # chat_groups[event.chat_id].title
+        # if event.is_group:
+        #     if event.chat_id not in group_cache:
+        #         chat = await event.get_chat()
+        #         group_cache[event.chat_id] = chat
+        #         # chat_groups[event.chat_id].title
 
-            print(
-                f"Tin nhắn mới từ: {group_cache[event.chat_id].title} (ID: {event.chat_id})")
-            group_messages[event.chat_id].append(event)
+        #     print(
+        #         f"Tin nhắn mới từ: {group_cache[event.chat_id].title} (ID: {event.chat_id})")
+        #     group_messages[event.chat_id].append(event)
 
-        # 2. TRƯỜNG HỢP CÁ NHÂN NHẮN CHO MÌNH (Inbox)
-        elif event.is_private:
-            # event.out = False nghĩa là tin nhắn từ người khác gửi đến mình
-            if not event.out:
-                if event.chat_id not in user_cache:
-                    user_cache[event.chat_id] = await event.get_chat()
+        # # 2. TRƯỜNG HỢP CÁ NHÂN NHẮN CHO MÌNH (Inbox)
+        # elif event.is_private:
+        #     # event.out = False nghĩa là tin nhắn từ người khác gửi đến mình
+        #     if not event.out:
+        #         if event.chat_id not in user_cache:
+        #             user_cache[event.chat_id] = await event.get_chat()
 
-                # sender = user_cache[event.chat_id]
-                # print(f"Người dùng [{sender.first_name}]: {event.raw_text}")
-                user_messages[event.chat_id].append(event)
+        #         sender = user_cache[event.chat_id]
+        #         print(f"Người dùng [{sender.first_name}]")
+        #         user_messages[event.chat_id].append(event)
 
-        # Logic tóm tắt sẽ được chạy trong một task riêng biệt
+        # # Logic tóm tắt sẽ được chạy trong một task riêng biệt
 
+        # print(f"{event}")
+        # print(f"-----------------------------------")
     print("telethon start, you will get summary interval 5 minutes in Saved messageses ...")
     await client.start()
 
-    # Chạy tác vụ nền để tóm tắt định kỳ
-    asyncio.create_task(periodic_summary())
+    # # Chạy tác vụ nền để tóm tắt định kỳ
+    # asyncio.create_task(periodic_summary())
 
     print("Đã khởi động tác vụ tóm tắt định kỳ.")
 

@@ -226,62 +226,6 @@ async def handle_webhook(request: Request):
 
     return {"status": "ok"}
 
-
-@app.post("/discord")
-async def discord_interactions(request: Request):
-    # 1. Bắt buộc phải xác thực chữ ký (Discord yêu cầu)
-    signature = request.headers.get("X-Signature-Ed25519")
-    timestamp = request.headers.get("X-Signature-Timestamp")
-    body = await request.body()
-    print(f"DISCORD body: {body}")
-    body_decode = body.decode()
-    verify_key = VerifyKey(bytes.fromhex(DISCORD_PUBKEY))
-    try:
-        verify_key.verify(
-            timestamp.encode() + body,
-            bytes.fromhex(signature))
-        # verify_key.verify(f"{timestamp}".encode() + body, bytes.fromhex(signature))
-    except Exception as ex:
-        print(f"DISCORD: fail ping pong: {ex}")
-        raise HTTPException(
-            status_code=401, detail="Invalid request signature")
-
-    print(f"DISCORD: {timestamp} {signature} {body_decode}")
-    # 2. Xử lý gói tin PING từ Discord (Để lưu được URL)
-    data = await request.json()
-    print(f"DISCORD JSON : {data}")
-
-    if data.get("type") == 1:
-        return {"type": 1}  # Trả về PING thành công
-
-    # 3. Xử lý tin nhắn chat của bạn ở đây...
-    # 2. Xử lý khi có người dùng tương tác (Slash Command hoặc Mention)
-    if data.get("type") == 2:  # Type 2 là Application Command (ví dụ lệnh /)
-        command_data = data.get("data", {})
-        # Lấy chat_id (channel_id trong discord)
-        chat_id = data.get("channel", {}).get("id")
-        user_input = ""
-
-        # Lấy nội dung người dùng nhập (nếu dùng Slash Command)
-        options = command_data.get("options", [])
-        if options:
-            user_input = options[0].get("value", "")
-        if user_input == "":
-            return {"type": 6}
-
-        bot_reply = await process_chat_history_and_received_msg(user_input, chat_id)
-
-        # Trả về kết quả cho Discord
-        return {
-            "type": 4,
-            "data": {
-                "content": f"{bot_reply}",
-                "tts": False  # Text-to-speech
-            }
-        }
-
-    return {"status": "ok"}
-
 # Đoạn này để chạy trực tiếp bằng python main.py (hoặc dùng lệnh uvicorn ở ngoài)
 
 
@@ -289,3 +233,60 @@ if __name__ == "__main__":
     uvicorn.run("program:app", host="0.0.0.0", port=PORT, reload=False)
 
     # đăng ký bot callback  https://api.telegram.org/bot<TOKEN_CUA_BAN>/setWebhook?url=<LINK_NGROK>/webhook
+
+
+
+# @app.post("/discord")
+# async def discord_interactions(request: Request):
+#     # 1. Bắt buộc phải xác thực chữ ký (Discord yêu cầu)
+#     signature = request.headers.get("X-Signature-Ed25519")
+#     timestamp = request.headers.get("X-Signature-Timestamp")
+#     body = await request.body()
+#     print(f"DISCORD body: {body}")
+#     body_decode = body.decode()
+#     verify_key = VerifyKey(bytes.fromhex(DISCORD_PUBKEY))
+#     try:
+#         verify_key.verify(
+#             timestamp.encode() + body,
+#             bytes.fromhex(signature))
+#         # verify_key.verify(f"{timestamp}".encode() + body, bytes.fromhex(signature))
+#     except Exception as ex:
+#         print(f"DISCORD: fail ping pong: {ex}")
+#         raise HTTPException(
+#             status_code=401, detail="Invalid request signature")
+
+#     print(f"DISCORD: {timestamp} {signature} {body_decode}")
+#     # 2. Xử lý gói tin PING từ Discord (Để lưu được URL)
+#     data = await request.json()
+#     print(f"DISCORD JSON : {data}")
+
+#     if data.get("type") == 1:
+#         return {"type": 1}  # Trả về PING thành công
+
+#     # 3. Xử lý tin nhắn chat của bạn ở đây...
+#     # 2. Xử lý khi có người dùng tương tác (Slash Command hoặc Mention)
+#     if data.get("type") == 2:  # Type 2 là Application Command (ví dụ lệnh /)
+#         command_data = data.get("data", {})
+#         # Lấy chat_id (channel_id trong discord)
+#         chat_id = data.get("channel", {}).get("id")
+#         user_input = ""
+
+#         # Lấy nội dung người dùng nhập (nếu dùng Slash Command)
+#         options = command_data.get("options", [])
+#         if options:
+#             user_input = options[0].get("value", "")
+#         if user_input == "":
+#             return {"type": 6}
+
+#         bot_reply = await process_chat_history_and_received_msg(user_input, chat_id)
+
+#         # Trả về kết quả cho Discord
+#         return {
+#             "type": 4,
+#             "data": {
+#                 "content": f"{bot_reply}",
+#                 "tts": False  # Text-to-speech
+#             }
+#         }
+
+#     return {"status": "ok"}
