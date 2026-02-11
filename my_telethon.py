@@ -93,7 +93,7 @@ events.CallbackQuery	Khi người dùng nhấn vào các nút (Inline Buttons) c
     # # Chạy tác vụ nền để tóm tắt định kỳ
     # asyncio.create_task(periodic_summary())
 
-    print("Đã khởi động tác vụ tóm tắt định kỳ.")
+    # print("Đã khởi động tác vụ tóm tắt định kỳ.")
 
     await client.run_until_disconnected()
 

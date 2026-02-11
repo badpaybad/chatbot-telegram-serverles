@@ -1,0 +1,19 @@
+# Sử dụng Image có sẵn CUDA để chạy GPU
+FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
+
+# Cài đặt Python và các thư viện hệ thống
+RUN apt-get update && apt-get install -y \
+    python3.10 python3-pip git espeak-ng libsndfile1-dev ffmpeg
+
+# Nâng cấp pip
+RUN python3 -m pip install --upgrade pip
+
+# Cài đặt các thư viện AI
+RUN pip3 install faster-whisper ollama
+RUN pip3 install git+https://github.com/coqui-ai/TTS.git
+
+# Thiết lập thư mục làm việc
+WORKDIR /app
+
+# Lệnh chạy (ví dụ chạy script của bạn)
+# CMD ["python3", "your_script.py"]
