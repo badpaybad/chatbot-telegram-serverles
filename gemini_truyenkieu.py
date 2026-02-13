@@ -4,6 +4,7 @@ import httpx
 import re
 import os
 import uuid
+import mimetypes
 from urllib.parse import urlparse
 
 
@@ -12,6 +13,16 @@ from config import GEMINI_APIKEY, GEMINI_MODEL
 DOWNLOAD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "downloads")
 if not os.path.exists(DOWNLOAD_DIR):
     os.makedirs(DOWNLOAD_DIR)
+
+
+def map_mime_type(mime_type: str) -> str:
+    """Ánh xạ mime_type không được Gemini hỗ trợ sang mime_type hợp lệ (như text/plain)."""
+    if not mime_type:
+        return "text/plain"
+    unsupported_types = ["application/json", "application/javascript", "application/xml", "text/html", "text/css"]
+    if any(t in mime_type.lower() for t in unsupported_types):
+        return "text/plain"
+    return mime_type
 
 
 # Định nghĩa phong cách của Nguyễn Du qua System Instruction
@@ -33,6 +44,13 @@ Trả lời:
 Gặp người tri kỷ, bồi hồi xiết bao.
 Trời xanh mây trắng trên cao,
 Chữ tâm kia mới thấm vào lòng nhau."
+
+LƯU Ý QUAN TRỌNG:
+- Khi người dùng cung cấp link (URL), bạn PHẢI sử dụng công cụ `fetch_url_content` để lấy dữ liệu thực tế từ link đó trước khi trả lời. 
+- Sau khi có dữ liệu từ công cụ, hãy phân tích và trả lời đúng theo phong cách Lục Bát.
+- Tuyệt đối không được đoán nội dung link hoặc từ chối đọc link nếu bạn chưa gọi tool.
+- Link có thể là nội dung text dạng json hoặc text thuần, bạn cũng cẫn xem kỹ để dùng trong làm thơ
+- Link có thể là file thì đã được đính upload lên cho bạn để bạn xác định nội dung bên trong, có thể là ảnh, video, pdf ...
 """
 # Khởi tạo client cấp thấp với API Key của bạn
 clientGemini = genai.Client(api_key=GEMINI_APIKEY)
@@ -55,8 +73,6 @@ def fetch_url_content(url: str):
 
     Args:
         url: Đường dẫn URL đầy đủ cần xử lý.
-    Returns:
-        Một tuple chứa (nội dung hoặc đường dẫn file, mime_type).
     """
     print(f"--- Đang tải nội dung từ URL: {url} ---")
     try:
@@ -70,6 +86,9 @@ def fetch_url_content(url: str):
             # Kiểm tra nếu là text-based content
             text_types = ["text/", "application/json", "application/javascript", "application/xml"]
             is_text = any(t in mime_type for t in text_types)
+
+            if mime_type=="":
+                mime_type="text/plain"
 
             if is_text:
                 html_content = response.text
@@ -98,7 +117,7 @@ def fetch_url_content(url: str):
                 with open(file_path, "wb") as f:
                     f.write(response.content)
                 
-                print(f"--- Đã tải file về: {file_path} ---")
+                print(f"fetch_url_content --- Đã tải file về: {file_path} ---")
                 return file_path,mime_type, "file"
 
     except Exception as e:
@@ -106,32 +125,38 @@ def fetch_url_content(url: str):
         return "", "text/plain","text"
 
 
-# Khai báo công cụ Google Search
-tools = [
-    # Công cụ Google Search (grounding)
-    # Tạm tắt vì không dùng chung được với Function Calling trong phiên bản này
-    # types.Tool(
-    #     google_search=types.GoogleSearch()
-    # ),
-    # Công cụ do người dùng định nghĩa (hàm Python)
-    fetch_url_content
-]
+# Khai báo công cụ fetch_url_content một cách tường minh
+fetch_url_content_tool = types.Tool(
+    function_declarations=[
+        types.FunctionDeclaration(
+            name="fetch_url_content",
+            description="BẮT BUỘC gọi công cụ này khi người dùng gửi một liên kết (URL) trong tin nhắn. Công cụ này sẽ lấy toàn bộ nội dung văn bản (HTML, JSON, ...) hoặc tải file (Image, PDF, ...) từ link đó. Bạn cần dữ liệu từ công cụ này để có thể phân tích và trả lời yêu cầu của người dùng một cách chính xác nhất.",
+            parameters=types.Schema(
+                type="OBJECT",
+                properties={
+                    "url": types.Schema(
+                        type="STRING",
+                        description="Đường dẫn URL đầy đủ (ví dụ: http://example.com/article hoặc https://example.com/image.jpg)"
+                    )
+                },
+                required=["url"]
+            )
+        )
+    ]
+)
 
-tools_google = [
-    # Công cụ Google Search (grounding)
-    # Tạm tắt vì không dùng chung được với Function Calling trong phiên bản này
-    types.Tool(
-        google_search=types.GoogleSearch()
-    ),
-    # Công cụ do người dùng định nghĩa (hàm Python)
-    # fetch_url_content
-]
+# Khai báo công cụ Google Search
+google_search_tool = types.Tool(
+    google_search=types.GoogleSearch()
+)
+
+tools = [fetch_url_content_tool]
+tools_google = [google_search_tool]
 
 # Cấu hình sinh nội dung
 generation_config = types.GenerateContentConfig(
     temperature=0.7,  # Độ sáng tạo vừa phải để giữ đúng vần luật,
     system_instruction=system_instruction,
-    tools=tools,
     # tool_config=types.ToolConfig(
     #     function_calling_config=types.FunctionCallingConfig(
     #         mode="AUTO"
@@ -176,9 +201,16 @@ def chat_voi_cu_nguyen_du_memory(user_input, history: list = None,listPathFiles:
         print(f"--- Đang upload {len(listPathFiles)} file lên Gemini... ---")
         for path in listPathFiles:
             try:
-                # Upload file lên Gemini
-                uploaded_file = clientGemini.files.upload(file=path)
-                print(f"Đã upload file: {uploaded_file.uri}")
+                # Xác định mime_type của file cục bộ trước khi upload
+                mime_type_guess, _ = mimetypes.guess_type(path)
+                upload_mime_type = map_mime_type(mime_type_guess)
+                
+                print(f"--- Đang upload file: {path} với mime_type: {upload_mime_type} ---")
+                
+                # Upload file lên Gemini với mime_type đã được ép kiểu (nếu cần)
+                uploaded_file = clientGemini.files.upload(file=path, config=types.UploadFileConfig(mime_type=upload_mime_type))
+                
+                print(f"Đã upload file: {uploaded_file.uri} {uploaded_file.mime_type}")
                 
                 # Thêm vào parts dưới dạng URI
                 user_parts.append(
@@ -199,14 +231,21 @@ def chat_voi_cu_nguyen_du_memory(user_input, history: list = None,listPathFiles:
     
     # Xác định config dựa trên user_input
     if re.search(r'https?://\S+', user_input):
-        dynamic_tools = [fetch_url_content]
+        dynamic_tools = [fetch_url_content_tool]
+        print("fetch_url_content tool register manual========================================")
     else:
-        dynamic_tools = [types.Tool(google_search=types.GoogleSearch())]
+        dynamic_tools = [google_search_tool]
+        print("GoogleSearch register manual========================================")
 
     dynamic_config = types.GenerateContentConfig(
         temperature=0.7,
         system_instruction=system_instruction,
         tools=dynamic_tools,
+        tool_config=types.ToolConfig(
+            function_calling_config=types.FunctionCallingConfig(
+                mode="AUTO"
+            )
+        )
     )
 
     # 2. Loop & Gọi API (Xử lý Function Calling)
@@ -217,6 +256,13 @@ def chat_voi_cu_nguyen_du_memory(user_input, history: list = None,listPathFiles:
             config=dynamic_config,
             contents=full_contents,
         )
+
+        # In kết quả response để debug
+        print(f"--- Gemini Response Candidates: {len(response.candidates)} ---")
+        if response.candidates:
+            print(f"--- Finish Reason: {response.candidates[0].finish_reason} ---")
+            print(f"--- Content Parts: {len(response.candidates[0].content.parts)} ---")
+            # print(response)
 
         # Kiểm tra xem Gemini có muốn gọi tool không
         if response.function_calls:
@@ -232,44 +278,43 @@ def chat_voi_cu_nguyen_du_memory(user_input, history: list = None,listPathFiles:
                 print(f"--- Gemini yêu cầu gọi hàm: {func_name} | Args: {func_args} ---")
 
                 # Xử lý các hàm cụ thể
-                api_result = {}
+                api_response_content = {} 
                 if func_name == "fetch_url_content":
                     url = func_args.get("url")
                     if url:
-                        content_or_path, mime_type ,type_content = fetch_url_content(url)
-                        api_result = {
-                            "content": content_or_path,
-                            "type": mime_type,
-                            "type_content": type_content
-                        }
+                        content_or_path, mime_type, type_content = fetch_url_content(url)
+                        print("len(content_or_path), mime_type, type_content",len(content_or_path), mime_type, type_content)
+                        if type_content == "file" and content_or_path!="":
+                            try:
+                                # Xác định mime_type trước khi upload cho file lấy từ tool
+                                mime_type_guess, _ = mimetypes.guess_type(content_or_path)
+                                upload_mime_type = map_mime_type(mime_type_guess or mime_type)
+                                
+                                uploaded_file = clientGemini.files.upload(
+                                    file=content_or_path, 
+                                    config=types.UploadFileConfig(mime_type=upload_mime_type)
+                                )
+                                print(f"Agent tools call -> Đã upload file: {uploaded_file.uri} {uploaded_file.mime_type}")
+                                api_response_content = {"file_uri": uploaded_file.uri, "mime_type": uploaded_file.mime_type}
+                            except Exception as e:
+                                print(f"Lỗi khi upload file '{content_or_path}': {e}")
+                                api_response_content = {"error": f"Failed to upload file: {e}"}
+                        else: # type_content == "text"
+                            api_response_content = {"text_content": content_or_path}
                     else:
-                        api_result = {"error": "Missing URL parameter"}
+                        api_response_content = {"error": "Missing URL parameter"}
                 else:
-                    api_result = {"error": f"Function {func_name} not found"}
+                    api_response_content = {"error": f"Function {func_name} not found"}
 
-                # Nếu kết quả là file, upload lên Gemini và thêm URI vào parts
-                if api_result.get("type_content") == "file":
-                    path = api_result["content"]
-                    try:
-                        uploaded_file = clientGemini.files.upload(file=path)
-                        print(f"Agent tools call -> Đã upload file: {uploaded_file.uri}")
-                        
-                        tool_response_parts.append(
-                            types.Part.from_uri(
-                                file_uri=uploaded_file.uri,
-                                mime_type=uploaded_file.mime_type
-                            )
-                        )
-                    except Exception as e:
-                        print(f"Lỗi khi upload file '{path}': {e}")
-               
                 # Thêm phản hồi thực thi tool
                 tool_response_parts.append(
                     types.Part.from_function_response(
                         name=func_name,
-                        response=api_result
+                        response=api_response_content
                     )
                 )
+
+                # print(f"api_response_content -------------------------------: {api_response_content}")
 
             if len(tool_response_parts)>0:
               # Thêm kết quả thực thi tool (tất cả các tool calls) vào ngữ cảnh một lần duy nhất

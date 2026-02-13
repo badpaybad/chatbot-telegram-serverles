@@ -3,7 +3,7 @@ import uuid
 from collections import defaultdict, deque
 import os
 # https://my.telegram.org/apps
-from config import TELEGRAM_API_ID, TELEGRAM_API_HASH
+from config import TELEGRAM_API_ID, TELEGRAM_API_HASH,TELEGRAM_BOT_CHATID
 import asyncio
 # from gemini_summary import gemini_summary
 
@@ -64,13 +64,16 @@ events.CallbackQuery	Khi người dùng nhấn vào các nút (Inline Buttons) c
     @client.on(events.NewMessage)
     async def handler(event):
         # END: Added by Gemini
-        print("event===========================")
-        print(event)
-        print("event===========================")
+        print(f"event=========================== {event.chat_id}")
+     
         # chat_events["all"] = event
 
-        chat_id = event.chat_id
-       
+        chat_id = f"{event.chat_id}"
+
+        if chat_id != "1829114789" and chat_id != "-5251554348":
+            return
+        print(event)
+        print("event===========================")
         listPathFiles=[]
         # BEGIN: Added by Gemini
         if event.photo is not None or event.video is not None or event.document is not None:
@@ -95,6 +98,7 @@ events.CallbackQuery	Khi người dùng nhấn vào các nút (Inline Buttons) c
                     listPathFiles.append(full_path)
                 else:
                     print("Không tải được file.")
+            
         if event.message and event.message.message:
             print("event.message===========================")
             print(event.message.message)
@@ -103,6 +107,16 @@ events.CallbackQuery	Khi người dùng nhấn vào các nút (Inline Buttons) c
             print("reply_text===========================")
             print(reply_text)
             print("reply_text===========================")
+        else :
+            if event.message:
+        
+                print("event.message===========================")
+                print(event.message)
+                print("event.message===========================")
+                reply_text,newhistory = chat_voi_cu_nguyen_du_memory(event.message,[],listPathFiles)
+                print("reply_text===========================")
+                print(reply_text)
+                print("reply_text===========================")
         # if event.is_group:
         #     if event.chat_id not in group_cache:
         #         chat = await event.get_chat()
