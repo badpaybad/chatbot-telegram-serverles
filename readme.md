@@ -74,7 +74,9 @@ All above run
 
 Chat with your chat bot :
 
-my sample chatbot: https://t.me/dunp_assitant_bot
+my sample chatbot: https://t.me/robotnotification_bot
+
+add to your group chat then tag @robotnotification_bot to chat
 
 # 5. ollama 
 
