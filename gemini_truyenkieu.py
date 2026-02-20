@@ -172,8 +172,8 @@ generation_config = types.GenerateContentConfig(
 
 
 def chat_voi_cu_nguyen_du_memory(user_input, history: list = None,listPathFiles:list=None):
-    if user_input is None or user_input == "":
-        return "", history
+    # if user_input is None or user_input == "":
+    #     return "", history
     if history is None:
         history = []
 
