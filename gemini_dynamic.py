@@ -90,9 +90,10 @@ async def exec(skill, curret_message, list_current_msg, list_summary_chat, uniqu
             except Exception as e:
                 print(f"CLI Skill file upload error: {e}")
     first_base="""
-    Dựa vào dữ liệu đầu vào bạn sẽ phân tích để có thể gọi các công cụ (tool call) để thực hiện hành động và trả lời lại cho người dùng.
+    Dựa vào dữ liệu đầu vào bạn sẽ phân tích ra intent của người dùng.
     Có thể dùng các công cụ để gọi qua lại lẫn nhau để lấy, tìm kiếm, tập hợp đủ thông tin đầu vào cho từng công cụ cho đến khi có kết quả để trả lời.
-    Bạn có thể tạo các cấu trúc json để lưu trữ thông tin đầu vào cho từng công cụ.
+    Bạn có thể tạo các cấu trúc json để lưu trữ thông tin đầu vào cho từng công cụ cho phù hợp 
+    Chỉ dừng khi intent của người dùng đã đúng và có thể trả lời.
 
     Dữ liệu đầu vào sẽ bao gồm:
         - [Summarized History]: Tóm tắt lịch sử hội thoại.

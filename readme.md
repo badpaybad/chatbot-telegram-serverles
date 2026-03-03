@@ -17,6 +17,13 @@
                         ├── readme.md
                         └── config.py
 
+hoặc gemini_dynamic : có các buildin tool call: cli, http request crawler, file io, database query ... sẽ tự động build json input cho các tool call khi cần vào context chat, việc quyết định gọi tool call rồi gọi qua lại các tool call khác để có kết quả theo intent của người dùng
+
+                        skill_name
+                        ├── system_instruction.md
+                        ├── readme.md
+
+
 | cmd explain and exec | email cli |
 | :---: | :---: |
 |![cli](img1.png)|![email](img2.png)|
