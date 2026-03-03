@@ -215,7 +215,9 @@ async def process_chat_history_and_received_msg(user_text: str, chat_id,listFile
 @app.post("/webhook-jira")
 async def handle_jira(request: Request):
     print("Đang nhận Webhook từ Jira...")
-    print(await request.json())
+    jiradata=await request.json()
+    print(jiradata)
+    knowledgebase.dbcontext.db_jira.insert(jiradata)
     # todo: cần thao tác xử lý gì cần dùng dbcontext.py để lưu vào db, ở skills/jira cần lưu chat_id và jira url để sau có thể update và kiểm tra trạng thái rồi gửi message lên nhóm chát 
     pass
 

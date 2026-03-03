@@ -1,0 +1,17 @@
+# Initialization Commands for my_pc_assistant
+
+# 1. Create the project (already done)
+# flutter create --project-name my_pc_assistant my_pc_assistant
+
+# 2. Reorganize DDD structure (already done)
+# mv assistantapp/auth assistantapp/my_pc_assistant/lib/
+# mv assistantapp/buss assistantapp/my_pc_assistant/lib/
+# mv assistantapp/layout assistantapp/my_pc_assistant/lib/
+
+# 3. Get dependencies
+flutter pub get
+
+# 4. Generate code (ObjectBox, etc.)
+# dar pub run build_runner build --delete-conflicting-outputs
+# or
+flutter pub run build_runner build --delete-conflicting-outputs

@@ -1,27 +1,3 @@
-venv
-__pycache__
-config.py
-dunp-assitant-account-id-v1.session
-config.dunp.py
-config_dunp.py
-zalo_group_0.png
-**/voice_env/**
-**/venv/**
-voice_assistant/giong_cua_toi.wav
-voice_assistant/ket_qua_tieng_viet.wav
-downloads/
-data/vector_db/**/index.faiss
-data/vector_db/**/metadata.pkl
-test/data/vector_db/**/index.faiss
-test/data/vector_db/**/metadata.pkl
-knowledgebase/fasttext/cc.vi.300.bin
-knowledgebase/fasttext/cc.vi.300.vec
-knowledgebase/fasttext/cc.vi.300.bin.gz
-knowledgebase/fasttext/cc.vi.300.vec.gz
-data/knowledgebase.db
-data/*.db
-
-
 # Miscellaneous
 *.class
 *.log
