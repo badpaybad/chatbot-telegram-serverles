@@ -74,3 +74,4 @@ config_ngoc.py
 **/domain_handlers/**.xlsx
 **/domain_handlers/**.csv
 **/phieu_luong_nhan_vien/**
+**/data/**
