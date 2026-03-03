@@ -34,6 +34,7 @@ Dữ liệu đầu vào sẽ bao gồm:
 - [Recent Messages]: Các tin nhắn gần đây.
 - [Current Message]: Tin nhắn hiện tại của người dùng.
 - [URLs]: Các đường dẫn liên quan (nếu có).
+- Các file được gửi kèm (nếu có).
 
 Yêu cầu kỹ thuật:
 1. **BẮT BUỘC**: Đặt toàn bộ các lệnh bash shell cần thực thi vào trong các khối mã Markdown (ví dụ: ```bash [lệnh ở đây] ```).
