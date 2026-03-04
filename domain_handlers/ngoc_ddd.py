@@ -5,7 +5,7 @@ import re
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import asyncio
 import bot_telegram
-from config import TELEGRAM_BOT_GROUP_CHATID,TELEGRAM_OWNER_USERNAME,HISTORY_CHAT_MAX_LEN,TELEGRAM_BOT_TOKEN, TELEGRAM_API_URL, PORT, TELEGRAM_BOT_CHATID, TELEGRAM_BOT_USERNAME, GEMINI_APIKEY, DISCORD_PUBKEY, DISCORD_APPID, DISCORD_TOKEN,  TELEGRAM_API_ID, TELEGRAM_API_HASH, REPLY_ON_TAG_BOT_USERNAME
+from config import TELEGRAM_BOT_GROUP_CHATID,TELEGRAM_OWNER_USERID,TELEGRAM_OWNER_USERNAME,HISTORY_CHAT_MAX_LEN,TELEGRAM_BOT_TOKEN, TELEGRAM_API_URL, PORT, TELEGRAM_BOT_CHATID, TELEGRAM_BOT_USERNAME, GEMINI_APIKEY, DISCORD_PUBKEY, DISCORD_APPID, DISCORD_TOKEN,  TELEGRAM_API_ID, TELEGRAM_API_HASH, REPLY_ON_TAG_BOT_USERNAME
 import pandas as pd
 import matplotlib.pyplot as plt
 import telegram_types
@@ -170,7 +170,6 @@ def process_user_mapping(msg:telegram_types.OrchestrationMessage):
         print("Không tìm thấy username thiếu @ vd @username tên: fullname here")
         return None
     username = username_match.group(1)
-
     
     dbuser = sqllite_user_mapping.search_json("username",username)
     if dbuser and len(dbuser) > 0:
@@ -215,8 +214,9 @@ async def handle(msg:telegram_types.OrchestrationMessage):
     if msg.message.new_chat_members:
         await bot_telegram.send_telegram_welcome(msg.chat_id)
 
-    if fromuser and fromuser.username!=TELEGRAM_OWNER_USERNAME:
-        print("Tài khoản không có quyền làm, cần là tài khoản:",TELEGRAM_OWNER_USERNAME)
+    # if fromuser and fromuser.username!=TELEGRAM_OWNER_USERNAME:
+    if fromuser and int(fromuser.id) != int(TELEGRAM_OWNER_USERID):
+        print("Tài khoản không có quyền làm, cần là tài khoản:",TELEGRAM_OWNER_USERNAME,TELEGRAM_OWNER_USERID)
         return
         pass
 
