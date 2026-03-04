@@ -58,6 +58,7 @@ Quy tắc:
    - "description": Mô tả chi tiết cho issue (lấy từ ngữ cảnh).
    - "issuetype": "Task" (mặc định là Task trừ khi ngữ cảnh là Bug).
    - "duedate": "YYYY-MM-DD" (Nếu người dùng nhắc đến deadline hoặc các từ như "ngày mai", "thứ hai tới", hãy tính toán dựa trên ngày hiện tại {current_date}. Nếu không có nhắc đến, hãy để null).
+   - "assignee": "username" (Nếu người dùng nhắc đến tên người cụ thể, hãy để tên người đó. Nếu không có nhắc đến, hãy để null).
 3. Nếu KHÔNG cần tạo issue, hãy trả về:
    - "should_create": false
    - "reason": Lý do tại sao không tạo (ví dụ: người dùng chỉ đang chào hỏi hoặc đặt câu hỏi thông thường).
@@ -73,7 +74,7 @@ async def create_jira_issue(issue_data: dict) -> str:
         "Content-Type": "application/json"
     }
     
-    def build_payload(include_duedate=True):
+    def build_payload(include_duedate=True, include_assignee=True):
         payload = {
             "fields": {
                 "project": {
@@ -88,19 +89,35 @@ async def create_jira_issue(issue_data: dict) -> str:
         }
         if include_duedate and issue_data.get("duedate"):
             payload["fields"]["duedate"] = issue_data["duedate"]
+        if include_assignee and issue_data.get("assignee"):
+            payload["fields"]["assignee"] = {"name": issue_data["assignee"]}
         return payload
 
     try:
         async with httpx.AsyncClient() as client:
-            # Lần thử 1: Có duedate (nếu có)
-            payload = build_payload(include_duedate=True)
+            # Lần thử 1: Có duedate và assignee (nếu có)
+            payload = build_payload(include_duedate=True, include_assignee=True)
             response = await client.post(JIRA_SERVER_ISSUE_API, headers=headers, json=payload, timeout=30.0)
             
-            # Nếu lỗi 400 liên quan đến duedate, thử lại không có duedate
-            if response.status_code == 400 and "duedate" in response.text:
-                print("Jira Error: duedate field not allowed. Retrying without duedate...")
-                payload = build_payload(include_duedate=False)
-                response = await client.post(JIRA_SERVER_ISSUE_API, headers=headers, json=payload, timeout=30.0)
+            # Nếu lỗi 400 liên quan đến duedate hoặc assignee, thử lại bóc tách bớt các field gây lỗi
+            if response.status_code == 400:
+                resp_text = response.text
+                retry_needed = False
+                retry_duedate = True
+                retry_assignee = True
+                
+                if "duedate" in resp_text:
+                    print("Jira Error: duedate field not allowed. Retrying without duedate...")
+                    retry_duedate = False
+                    retry_needed = True
+                if "assignee" in resp_text:
+                    print("Jira Error: assignee field error. Retrying without assignee...")
+                    retry_assignee = False
+                    retry_needed = True
+                
+                if retry_needed:
+                    payload = build_payload(include_duedate=retry_duedate, include_assignee=retry_assignee)
+                    response = await client.post(JIRA_SERVER_ISSUE_API, headers=headers, json=payload, timeout=30.0)
 
             if response.status_code == 201:
                 res_json = response.json()

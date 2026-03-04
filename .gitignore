@@ -75,3 +75,4 @@ config_ngoc.py
 **/domain_handlers/**.csv
 **/phieu_luong_nhan_vien/**
 **/data/**
+**/test/**.db

@@ -154,7 +154,6 @@ def process_user_mapping(msg:telegram_types.OrchestrationMessage):
             if str(entity["type"]).lower() == "text_mention":
                 # username = entity["user"]["username"] or ""   
                 # fullname = entity["user"]["first_name"] + " " + entity["user"]["last_name"]
-                print("entities ->>>>>> ",entity)
                 return {
                     "id": entity["user"]["id"],
                     "username": "",
@@ -245,12 +244,10 @@ async def handle(msg:telegram_types.OrchestrationMessage):
 
     alluser= sqllite_user_mapping.select()
 
-
     for rec in alluser:
         user=rec["json"]
         print("user",user)
         if fileimages[user["fullname"].lower()]:
-
             # await bot_telegram.send_telegram_message(msg.chat_id, f"Lương {user['fullname']} ngày gửi: {datetime.datetime.now().strftime('%d/%m/%Y')}",[fileimages[user["fullname"].lower()]])
             rrrr=await bot_telegram.send_telegram_message(user["id"], f"Lương {user['fullname']} ngày gửi: {datetime.datetime.now().strftime('%d/%m/%Y')}",[fileimages[user["fullname"].lower()]])
             if rrrr ==None:

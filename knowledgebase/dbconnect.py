@@ -90,35 +90,62 @@ class SQLiteDB:
         return record_ids
 
 
-    def select(self, record_id=None, keyword=None):
+    def select(self, record_id: str | None = None, keyword: str | None = None, fromAt: int | None = None, toAt: int | None = None, limit: int | None = None):
         """
         Select records. 
-        - If record_id is provided, returns that specific record.
+        - If record_id is provided, returns that specific record (other filters ignored).
         - If keyword is provided, returns records where json content matches the keyword.
+        - Support filtering by time range (fromAt, toAt) and limiting the results (limit).
         - Otherwise returns all records in the table.
         """
-        result=[]
+        result = []
+        
         if record_id:
             query = f"SELECT * FROM {self.table_name} WHERE id = ?"
             with self._get_connection() as conn:
                 cursor = conn.execute(query, (record_id,))
                 row = cursor.fetchone()
                 if row:
-                    result= [{"id": row[0], "json": json.loads(row[1]), "at": row[2]}]
-        elif keyword:
-            query = f"SELECT * FROM {self.table_name} WHERE json LIKE ? ORDER BY at DESC"
-            with self._get_connection() as conn:
-                cursor = conn.execute(query, (f"%{keyword}%",))
-                rows = cursor.fetchall()
-                result= [{"id": row[0], "json": json.loads(row[1]), "at": row[2]} for row in rows]
-                result.sort(key=lambda x: x['at'])
-        else:
-            query = f"SELECT * FROM {self.table_name} ORDER BY at DESC"
-            with self._get_connection() as conn:
-                cursor = conn.execute(query)
-                rows = cursor.fetchall()
-                result= [{"id": row[0], "json": json.loads(row[1]), "at": row[2]} for row in rows]
-                result.sort(key=lambda x: x['at'])
+                    result = [{"id": row[0], "json": json.loads(row[1]), "at": row[2]}]
+            return result
+
+        # Dynamic query building for other cases
+        conditions = []
+        params = []
+
+        if keyword:
+            conditions.append("json LIKE ?")
+            params.append(f"%{keyword}%")
+        
+        if fromAt is not None:
+            conditions.append("at >= ?")
+            params.append(fromAt)
+        
+        if toAt is not None:
+            conditions.append("at <= ?")
+            params.append(toAt)
+
+        where_clause = ""
+        if conditions:
+            where_clause = "WHERE " + " AND ".join(conditions)
+
+        order_by = "ORDER BY at DESC"
+        
+        limit_clause = ""
+        if limit is not None:
+            limit_clause = f"LIMIT {int(limit)}"
+
+        query = f"SELECT * FROM {self.table_name} {where_clause} {order_by} {limit_clause}"
+        
+        with self._get_connection() as conn:
+            cursor = conn.execute(query, params)
+            rows = cursor.fetchall()
+            result = [{"id": row[0], "json": json.loads(row[1]), "at": row[2]} for row in rows]
+            # The user's original code had a manual result.sort(key=lambda x: x['at']) 
+            # which is ASCENDING. However, the limit logic usually implies DESCENDING (top/latest).
+            # The existing keyword and else blocks used ORDER BY at DESC but then sorted ASC in Python.
+            # I will keep the Python sort to maintain consistent behavior with previous version.
+            result.sort(key=lambda x: x['at'])
 
         return result
 
@@ -145,19 +172,41 @@ class SQLiteDB:
             conn.commit()
             return cursor.rowcount > 0
 
-    def search_json(self, field_name, value):
+    def search_json(self, field_name: str, value, fromAt: int | None = None, toAt: int | None = None, limit: int | None = None):
         """
         Search for records where a specific field in the json column matches a value.
         field_name: The name of the field (e.g., 'topic') or JSON path (e.g., '$.author.name').
         value: The value to search for.
+        - Support filtering by time range (fromAt, toAt) and limiting the results (limit).
         """
         # Ensure field_name starts with $. if it's a simple key
         path = field_name if field_name.startswith("$") else f"$.{field_name}"
-        result=[]
-        query = f"SELECT * FROM {self.table_name} WHERE json_extract(json, ?) = ? ORDER BY at DESC"
+        result = []
+        
+        conditions = ["json_extract(json, ?) = ?"]
+        params = [path, value]
+
+        if fromAt is not None:
+            conditions.append("at >= ?")
+            params.append(fromAt)
+        
+        if toAt is not None:
+            conditions.append("at <= ?")
+            params.append(toAt)
+
+        where_clause = "WHERE " + " AND ".join(conditions)
+        order_by = "ORDER BY at DESC"
+        
+        limit_clause = ""
+        if limit is not None:
+            limit_clause = f"LIMIT {int(limit)}"
+
+        query = f"SELECT * FROM {self.table_name} {where_clause} {order_by} {limit_clause}"
+        
         with self._get_connection() as conn:
-            cursor = conn.execute(query, (path, value))
+            cursor = conn.execute(query, params)
             rows = cursor.fetchall()
             result = [{"id": row[0], "json": json.loads(row[1]), "at": row[2]} for row in rows]
             result.sort(key=lambda x: x['at'])
+            
         return result

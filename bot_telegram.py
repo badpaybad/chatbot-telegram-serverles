@@ -70,13 +70,14 @@ async def send_telegram_welcome(chat_id: int , text:str|None=None):
     botuname=TELEGRAM_BOT_USERNAME.replace("@","")
     async with httpx.AsyncClient() as client:
         try:
+            boturl=f"t.me/{botuname}?start=welcome"
             url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-            text=f"Chào mừng bạn đến với bot AI @{botuname}, {text if text else ''}, gửi link phía dưới để cho người dùng kích hoạt bot"
+            text=f"Bot AI @{botuname}, {text if text else ''}, gửi link https://{boturl} để cho người dùng kích hoạt bot"
           
             response = await client.post(url, json={"chat_id": chat_id, "text": text,
             "reply_markup": {
                 "inline_keyboard": [
-                    [{"text": "Kích hoạt Bot (Inbox)", "url": f"t.me/{botuname}?start=welcome"}]
+                    [{"text": "Kích hoạt Bot (Inbox)", "url": boturl}]
                 ]
             }
             }, timeout=30.0)

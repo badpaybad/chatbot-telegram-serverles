@@ -1,0 +1,142 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+**/__pycache__/
+**/.git
+**/.apache_superset.egg-info
+**/.github
+**/.mypy_cache
+**/.pytest_cache
+**/.tox
+**/.vscode
+**/.idea
+**/.coverage
+**/.DS_Store
+**/.eggs
+**/.python-version
+**/*.egg-info
+**/*.bak
+**/*.db
+**/*.pyc
+**/*.sqllite
+**/*.swp
+**/.terser-plugin-cache/
+**/node_modules/
+
+tests/
+docs/
+install/
+superset-frontend/cypress-base/
+superset-frontend/coverage/
+superset-frontend/.temp_cache/
+superset/static/assets/
+superset-websocket/dist/
+venv
+.venv
+
+
+**/myadmin/uploads/**
+
+**/telegram/**
+**/mqtt/**
+
+myadmincompose.zip
+**/Vikunja/db/**
+**/Vikunja/files/**
+
+**/nextcloudhub/nextcloud_code/**
+**/nextcloudhub/nextcloud_nas/**
+
+**/minio/minio_xfs/**
+
+venv
+__pycache__
+config.py
+dunp-assitant-account-id-v1.session
+config.dunp.py
+config_dunp.py
+zalo_group_0.png
+**/voice_env/**
+**/venv/**
+voice_assistant/giong_cua_toi.wav
+voice_assistant/ket_qua_tieng_viet.wav
+downloads/
+data/vector_db/**/index.faiss
+data/vector_db/**/metadata.pkl
+test/data/vector_db/**/index.faiss
+test/data/vector_db/**/metadata.pkl
+knowledgebase/fasttext/cc.vi.300.bin
+knowledgebase/fasttext/cc.vi.300.vec
+knowledgebase/fasttext/cc.vi.300.bin.gz
+knowledgebase/fasttext/cc.vi.300.vec.gz
+data/knowledgebase.db
+data/*.db
+
+
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+**/domains/ngoc**
+config_ngoc.py
+
+**/domain_handlers/**.xlsx
+**/domain_handlers/**.csv
+**/phieu_luong_nhan_vien/**
+**/data/**
+**/test/**.db
