@@ -8,7 +8,7 @@
 - Jira : Hỗ trợ các nhóm cskh tạo tự động các issues và báo cáo tiến độ cho issues 
 - Quét các folder tại PC chủ động dùng OCR , LLM ... summary image , video, pdx, docx ... để làm knowledge base cho assistant PC của bạn  
 - Google drive, ms one drive ..
-- Browser automation (puppyteer), GUI automation ( pyautogui)
+- Browser automation (puppyteer,playwright), GUI automation ( pyautogui)
 - Hỗ trợ gemini, nếu bạn không muốn dùng gemini có thể dùng LLM PC như ollama, llama.cpp ...
 - Tự bổ xung thêm skill nhờ LLM và python script, đơn giản chỉ cần tạo subfolder trong skills với cấu trúc
 

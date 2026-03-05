@@ -26,6 +26,47 @@ else:
 
 print("config.CONFIG_NAME",CONFIG_NAME)
 
+def setup_playwright():
+    # 1. Kiểm tra và cài đặt thư viện python 'playwright'
+    try:
+        import playwright
+        print("[*] Thư viện Playwright đã được cài đặt.")
+    except ImportError:
+        print("[!] Không tìm thấy thư viện Playwright. Đang tiến hành cài đặt...")
+        try:
+            # Lưu ý: pip install không cần -y
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "playwright"])
+            print("[+] Cài đặt thư viện Playwright thành công!")
+        except Exception as e:
+            print(f"[!] Lỗi cài đặt thư viện: {e}")
+            return
+
+    # 2. Kiểm tra và cài đặt trình duyệt Chromium
+    # Chúng ta sử dụng lệnh 'playwright install --with-deps' để đảm bảo đủ thư viện hệ thống
+    try:
+        # Cách kiểm tra nhanh: Thử lấy đường dẫn thực thi của chromium
+        from playwright.sync_api import sync_playwright
+        
+        with sync_playwright() as p:
+            # Nếu chromium chưa cài, dòng này thường sẽ văng lỗi
+            executable_path = p.chromium.executable_path
+            
+            if os.path.exists(executable_path):
+                print(f"[*] Chromium đã sẵn sàng tại: {executable_path}")
+            else:
+                raise FileNotFoundError
+                
+    except (ImportError, Exception):
+        print("[!] Chromium chưa được cài đặt hoặc bị lỗi. Đang tải xuống...")
+        try:
+            # Cài đặt chromium
+            subprocess.run([sys.executable, "-m", "playwright", "install", "chromium"], check=True)
+            # (Tùy chọn) Cài đặt dependencies hệ thống nếu bạn dùng Linux (cần sudo)
+            # subprocess.run([sys.executable, "-m", "playwright", "install-deps", "chromium"], check=True)
+            print("[+] Cài đặt Chromium thành công!")
+        except subprocess.CalledProcessError as e:
+            print(f"[!] Lỗi khi cài đặt trình duyệt: {e}. Vui lòng chạy 'playwright install chromium' thủ công.")
+
 def setup_swaks_tool():
     home_dir = Path.home()
     swaksrc_path = home_dir / ".swaksrc"
@@ -96,6 +137,8 @@ def init():
     # skills/cli/tool_call_cli.py , các tool phục vụ skill cli cần được cài và cấu hình trước 
     setup_curl()
     setup_swaks_tool()
+
+    setup_playwright()
 
 init()
 
