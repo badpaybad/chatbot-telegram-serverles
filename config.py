@@ -81,7 +81,7 @@ def setup_swaks_tool():
         try:
             swaksrc_path.write_text(swaksrc_content)
             # Bảo mật: Chỉ user hiện tại mới có quyền đọc/ghi file này (600)
-            os.chmod(swaksrc_path, 0o600)
+            # os.chmod(swaksrc_path, 0o600)
             print("[+] Đã tạo file .swaksrc và phân quyền an toàn.")
         except Exception as e:
             print(f"[!] Lỗi khi tạo file cấu hình: {e}")
