@@ -6,4 +6,4 @@ Bạn được toàn quyền chạy các lệnh cần thiết để hoàn thành
 3. Lưu các tổng hợp vào file .txt định dạng tên file news_{năm_tháng_ngày}.txt
 4. Đưa ra nhận định xu hướng các thông tin vào file .txt định dạng tên file trend_{năm_tháng_ngày}.txt
 5. Phân loại nội dung và lấy thông tin theo mô tả ở ner.md, tạo file .csv định dạng tên file data_{năm_tháng_ngày}.csv
-6. Dùng file .csv ở bước 5 để tạo các chart dạng .png định dạng tên file chart_{category ner.md}_{năm_tháng_ngày}.png
+6. Dùng file .csv ở bước 5 để tạo các chart biểu đồ GIS, map phân bổ impact,importance theo location,lat,lon định dạng tên file chart_impact_{năm_tháng_ngày}.png
