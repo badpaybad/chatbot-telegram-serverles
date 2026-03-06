@@ -156,71 +156,74 @@ class TelegramUpdate(BaseModel):
         return None
 
     def get_users_mention(self):
-        text_utf16 = (self.get_text()or"").encode('utf-16-le')
-        users=[]
-        if self.message.entities:
-            for entity in self.message.entities:
+        try:
+            text_utf16 = (self.get_text()or"").encode('utf-16-le')
+            users=[]
+            if self.message.entities:
+                for entity in self.message.entities:
 
-                username = ""   
+                    username = ""   
 
-                if str(entity["type"]).lower() == "mention":
-                    off = entity['offset'] * 2 # Nhân 2 vì mỗi unit trong utf-16-le là 2 bytes
-                    ln = entity['length'] * 2
-                    
-                    # Cắt byte sau đó decode lại thành string
-                    username = text_utf16[off : off + ln].decode('utf-16-le')
-                    users.append({
-                        "id":None,
-                        "username": username.replace("@","")
-                    })
+                    if str(entity["type"]).lower() == "mention":
+                        off = entity['offset'] * 2 # Nhân 2 vì mỗi unit trong utf-16-le là 2 bytes
+                        ln = entity['length'] * 2
+                        
+                        # Cắt byte sau đó decode lại thành string
+                        username = text_utf16[off : off + ln].decode('utf-16-le')
+                        users.append({
+                            "id":None,
+                            "username": username.replace("@","")
+                        })
 
-                    continue
+                        continue
 
-                if str(entity["type"]).lower() == "text_mention":
-                    try:
-                        username = entity["user"]["username"] or ""   
-                    except:
-                        pass
-                    fullname = ""   
-                    try:
-                        fullname = entity["user"]["fullname"] or ""   
-                    except:
-                        pass
-                    first_name = ""   
-                    try:
-                        first_name = entity["user"]["first_name"] or ""   
-                    except:
-                        pass
-                    last_name = ""   
-                    try:
-                        last_name = entity["user"]["last_name"] or ""   
-                    except:
-                        pass
-                    u = {
-                        "id": entity["user"]["id"],
-                        "username": username.replace("@",""),
-                        "fullname": fullname,
-                        "is_bot": entity["user"]["is_bot"],
-                        "first_name":first_name,
-                        "last_name":last_name
-                    }
-                    users.append(u)
-    
-        # fromuser= self.get_from_user()
-        # user_id = fromuser.id if fromuser else None
-        # first_name = fromuser.first_name if fromuser else None
-        # last_name = fromuser.last_name if fromuser else None
-        # is_bot = fromuser.is_bot if fromuser else None
+                    if str(entity["type"]).lower() == "text_mention":
+                        try:
+                            username = entity["user"]["username"] or ""   
+                        except:
+                            pass
+                        fullname = ""   
+                        try:
+                            fullname = entity["user"]["fullname"] or ""   
+                        except:
+                            pass
+                        first_name = ""   
+                        try:
+                            first_name = entity["user"]["first_name"] or ""   
+                        except:
+                            pass
+                        last_name = ""   
+                        try:
+                            last_name = entity["user"]["last_name"] or ""   
+                        except:
+                            pass
+                        u = {
+                            "id": entity["user"]["id"],
+                            "username": username.replace("@",""),
+                            "fullname": fullname,
+                            "is_bot": entity["user"]["is_bot"],
+                            "first_name":first_name,
+                            "last_name":last_name
+                        }
+                        users.append(u)
+        
+            # fromuser= self.get_from_user()
+            # user_id = fromuser.id if fromuser else None
+            # first_name = fromuser.first_name if fromuser else None
+            # last_name = fromuser.last_name if fromuser else None
+            # is_bot = fromuser.is_bot if fromuser else None
 
-        # return {
-        #     "id": user_id,
-        #     "username": username,
-        #     "fullname": fullname,
-        #     "is_bot": is_bot,
-        #     "first_name": first_name,
-        #     "last_name": last_name
-        # }
-        return users
+            # return {
+            #     "id": user_id,
+            #     "username": username,
+            #     "fullname": fullname,
+            #     "is_bot": is_bot,
+            #     "first_name": first_name,
+            #     "last_name": last_name
+            # }
+            return users
+        except :
+            return []
 
         pass
     def get_user_mention(self):

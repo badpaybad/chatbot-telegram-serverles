@@ -70,7 +70,7 @@ async def get_user_info(username: str):
     
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getChat"
 
-    params = {"chat_id": f"@{username}"}
+    params = {"chat_id": f"{username}"}
     
     async with httpx.AsyncClient() as client:
         try:
