@@ -16,7 +16,7 @@ import datetime
 import time
 import random
 
-sqllite_user_mapping=dbconnect.SQLiteDB("user_mapping")
+sqllite_user_mapping=dbconnect.SQLiteDB("excel_user_mapping")
 
 def excel_to_csv(file_path):
     try:

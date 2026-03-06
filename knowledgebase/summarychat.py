@@ -18,7 +18,8 @@ import threading
 import queue
 import time
 import knowledgebase.dbcontext
-
+import bot_telegram
+import asyncio
 class SummaryChat:
     def __init__(self, batch_size=10):
         self.queue = queue.Queue()
@@ -27,9 +28,18 @@ class SummaryChat:
         self.batch_size = batch_size
         self.chat_buffers = {} # dict: chat_id -> list of (update_obj, formatted_string)
         self.running = True
-        self.thread = threading.Thread(target=self._process_loop, daemon=True)
+        self.thread = threading.Thread(target=self._thread_entry, daemon=True)
         self.thread.start()
 
+    def _thread_entry(self):
+            """Hàm này chạy trong Thread mới, thiết lập môi trường async"""
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            
+            # Chạy hàm async loop cho đến khi kết thúc
+            loop.run_until_complete(self._process_loop())
+            loop.close()
+            
     def enqueue_update(self, update_obj:telegram_types.TelegramUpdate|Any):
         """
         Enqueue a Telegram update object for processing.
@@ -63,11 +73,49 @@ class SummaryChat:
             print(f"Error formatting message: {e}")
             return None
 
-    def _process_loop(self):
+    async def _insert_or_update_telegram_user(self, msg: telegram_types.TelegramUpdate):
+        users= msg.get_users_mention()
+
+        fromuser= msg.get_from_user()
+        user_id = fromuser.id if fromuser else None
+        first_name = fromuser.first_name if fromuser else None
+        last_name = fromuser.last_name if fromuser else None
+        is_bot = fromuser.is_bot if fromuser else None
+        username = fromuser.username if fromuser else None
+        fullname=f"{first_name} {last_name}"
+
+        users.append( {
+            "id": user_id,
+            "username": username.replace("@",""),
+            "fullname": fullname,
+            "is_bot": is_bot,
+            "first_name": first_name,
+            "last_name": last_name
+        })
+
+        for u in users:
+            if u["id"]==None and not u["username"]:
+                ut= await bot_telegram.get_user_info(u["username"])
+                if ut:
+                    knowledgebase.dbcontext.db_telegram_user.insert(ut)
+                continue
+            existed = knowledgebase.dbcontext.db_telegram_user.search_json("id",u["id"])
+            if not existed or len(existed)==0:
+                knowledgebase.dbcontext.db_telegram_user.insert(u)
+                pass
+            pass
+
+        pass
+
+    async def _process_loop(self):
         while self.running:
             try:
                 # Wait for items, timeout to check self.running
                 update_obj:telegram_types.TelegramUpdate = self.queue.get(timeout=5)
+
+                # asyncio.run(self._insert_or_update_telegram_user(update_obj))
+                await self._insert_or_update_telegram_user(update_obj)
+
                 formatted = self._format_message(update_obj)
                 if formatted:
                     chat_id = update_obj.get_chat_id()

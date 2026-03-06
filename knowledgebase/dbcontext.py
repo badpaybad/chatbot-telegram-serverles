@@ -12,3 +12,7 @@ db_summary_chat = SQLiteDB(table_name="summary_chat")
 db_jira = SQLiteDB(table_name="jira")
 
 db_orchestration_all_message = SQLiteDB(table_name="orchestration_all_message")
+
+db_jira_user = SQLiteDB(table_name="jira_user")
+
+db_telegram_user = SQLiteDB(table_name="telegram_user")

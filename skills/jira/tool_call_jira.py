@@ -25,7 +25,7 @@ from config import (
 
 import bot_telegram
 # import bot_discord
-# import telegram_types
+import telegram_types
 
 import knowledgebase
 import skills.common_question_answer.main as common_question_answer
@@ -66,6 +66,46 @@ Quy tắc:
 4. Luôn trả lời bằng văn phong chuyên nghiệp, tiếng Việt.
 5. Project Key hiện tại là: {JIRA_PROJECT_KEY}
 """
+
+async def mapping_user_jira(curret_message:telegram_types.OrchestrationMessage):
+    user_info={"id":None,"username":None,"fullname":None,"is_bot":None,"first_name":None,"last_name":None}
+    try:
+        user_info = curret_message.message.get_user_mention()
+    except:
+        pass
+
+    if not user_info["id"] and user_info['username']:
+        existed=knowledgebase.dbcontext.db_jira_user.search_json("username",user_info['username'])
+        if existed and len(existed)>0:
+            return existed['json']
+        else:
+            user_info = await bot_telegram.get_user_info(user_info['username'])
+
+    if not user_info["id"]:
+        return  
+    knowledgebase.dbcontext.db_jira_user.insert({
+        'id':user_info['id'] or None,
+        'username':user_info['username'] or None,
+        'fullname':user_info['fullname'] or None,
+        'is_bot':user_info['is_bot'] or None,
+        'first_name':user_info['first_name'] or None,
+        'last_name':user_info['last_name'] or None,
+        'jira_username':user_info['fullname'] or None
+    })
+
+def get_username_jira(username:str):
+    """Lấy username jira từ telegram username được để trong message vd @badpaybad
+
+    Args:
+        username (str): telegram username được để trong message vd @badpaybad
+
+    Returns:
+        _type_: telegram_types.FromUser
+    """
+    user_info=knowledgebase.dbcontext.db_jira_user.search_json("username",username)
+
+    return user_info[0]
+
 
 async def create_jira_issue(issue_data: dict) -> str:
     """Gửi request POST để tạo issue Jira."""
@@ -130,6 +170,26 @@ async def create_jira_issue(issue_data: dict) -> str:
     except Exception as e:
         return f"❌ Lỗi hệ thống khi gọi Jira API: {str(e)}"
 
+
+# get_jira_username_from_tele_username = types.Tool(
+#     function_declarations=[
+#         types.FunctionDeclaration(
+#             name="get_username_jira",
+#             description="Lấy username jira từ telegram username được để trong message vd @badpaybad",
+#             parameters=types.Schema(
+#                 type="OBJECT",
+#                 properties={
+#                     "username": types.Schema(
+#                         type="STRING",
+#                         description="telegram username được để trong message vd @badpaybad"
+#                     )
+#                 },
+#                 required=["username"]
+#             )
+#         )
+#     ]
+# )  
+
 async def exec(skill, curret_message, list_current_msg, list_summary_chat, unique_urls,contents_from_url):
     """
     Hành động chính của skill Jira:
@@ -140,6 +200,8 @@ async def exec(skill, curret_message, list_current_msg, list_summary_chat, uniqu
     """
     user_text = curret_message.text
     chat_id = curret_message.chat_id
+
+    # await mapping_user_jira(curret_message)
     
     # 1. Tạo Context Block
     summary_text = "### [Summarized History]\n"

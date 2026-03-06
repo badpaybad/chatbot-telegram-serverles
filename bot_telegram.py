@@ -66,6 +66,46 @@ import knowledgebase
 import knowledgebase.orchestrationcontext
 import knowledgebase.dbcontext
 
+async def get_user_info(username: str):
+    
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getChat"
+
+    params = {"chat_id": f"@{username}"}
+    
+    async with httpx.AsyncClient() as client:
+        try:
+            # response = await client.post(url, json=params)
+            # Dùng params thay vì json cho phương thức getChat
+            response = await client.get(url, params=params)
+            # Kiểm tra lỗi HTTP (4xx, 5xx)
+            response.raise_for_status()
+            
+            data = response.json()
+            
+            if data.get("ok"):
+                user = data["result"]
+                # Build object theo đúng yêu cầu của bạn
+                user_info = {
+                    "id": user.get("id"),
+                    "username": user.get("username"),
+                    "fullname": f"{user.get('first_name', '')} {user.get('last_name', '')}".strip(),
+                    "is_bot": False, # getChat thường dùng cho người dùng
+                    "first_name": user.get("first_name"),
+                    "last_name": user.get("last_name")
+                }
+                return user_info
+            else:
+                print( {"error": data.get("description")})
+                return None
+                
+        except httpx.HTTPStatusError as e:
+            print( {"error": str(e)})
+            print( {"error": f"Lỗi API: {e.response.json().get('description')}"})
+            return None
+        except Exception as e:
+            print( {"error": str(e)})
+            return None
+
 async def send_telegram_welcome(chat_id: int , text:str|None=None):
     botuname=TELEGRAM_BOT_USERNAME.replace("@","")
     async with httpx.AsyncClient() as client:

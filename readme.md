@@ -89,7 +89,7 @@ All above run
 
 
               pip install --upgrade pip
-              pip install fastapi uvicorn pydantic httpx pynacl google-genai telethon matplotlib bs4 playwright faiss-cpu fasttext numpy transformers sentence_transformers 
+              pip install fastapi uvicorn pydantic httpx pynacl google-genai telethon Pyrogram matplotlib bs4 playwright faiss-cpu fasttext numpy transformers sentence_transformers 
 
               pip install einops timm
 

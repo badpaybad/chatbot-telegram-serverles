@@ -1,5 +1,6 @@
 
 from pydantic import BaseModel, Field,ConfigDict
+import re
 from typing import Any,List,Optional
 # --- ĐỊNH NGHĨA DỮ LIỆU (Pydantic Models) ---
 # Giúp code sạch hơn và tự động kiểm tra dữ liệu đầu vào
@@ -136,7 +137,7 @@ class TelegramUpdate(BaseModel):
         return None
 
     
-    def get_message_from_user(self)->FromUser|None:
+    def get_from_user(self)->FromUser|None:
         if self.message:
             return self.message.from_user
         elif self.edited_message:
@@ -144,6 +145,152 @@ class TelegramUpdate(BaseModel):
         elif self.result:
             return self.result.from_user
         return None
+
+    def get_text(self):
+        if self.message:
+            return self.message.text
+        elif self.edited_message:
+            return self.edited_message.text
+        elif self.result:
+            return self.result.text
+        return None
+
+    def get_users_mention(self):
+        text_utf16 = (self.get_text()or"").encode('utf-16-le')
+        users=[]
+        if self.message.entities:
+            for entity in self.message.entities:
+
+                username = ""   
+
+                if str(entity["type"]).lower() == "mention":
+                    off = entity['offset'] * 2 # Nhân 2 vì mỗi unit trong utf-16-le là 2 bytes
+                    ln = entity['length'] * 2
+                    
+                    # Cắt byte sau đó decode lại thành string
+                    username = text_utf16[off : off + ln].decode('utf-16-le')
+                    users.append({
+                        "id":None,
+                        "username": username.replace("@","")
+                    })
+
+                    continue
+
+                if str(entity["type"]).lower() == "text_mention":
+                    try:
+                        username = entity["user"]["username"] or ""   
+                    except:
+                        pass
+                    fullname = ""   
+                    try:
+                        fullname = entity["user"]["fullname"] or ""   
+                    except:
+                        pass
+                    first_name = ""   
+                    try:
+                        first_name = entity["user"]["first_name"] or ""   
+                    except:
+                        pass
+                    last_name = ""   
+                    try:
+                        last_name = entity["user"]["last_name"] or ""   
+                    except:
+                        pass
+                    u = {
+                        "id": entity["user"]["id"],
+                        "username": username.replace("@",""),
+                        "fullname": fullname,
+                        "is_bot": entity["user"]["is_bot"],
+                        "first_name":first_name,
+                        "last_name":last_name
+                    }
+                    users.append(u)
+    
+        # fromuser= self.get_from_user()
+        # user_id = fromuser.id if fromuser else None
+        # first_name = fromuser.first_name if fromuser else None
+        # last_name = fromuser.last_name if fromuser else None
+        # is_bot = fromuser.is_bot if fromuser else None
+
+        # return {
+        #     "id": user_id,
+        #     "username": username,
+        #     "fullname": fullname,
+        #     "is_bot": is_bot,
+        #     "first_name": first_name,
+        #     "last_name": last_name
+        # }
+        return users
+
+        pass
+    def get_user_mention(self):
+        text=self.get_text()
+        if not text:
+            return None
+        # Handle fullname after tên: or ten: or name:
+        # Use (?i) for case-insensitive, and \s* for optional spaces
+        fullname_match = re.search(r"(?i)(?:\s+tên|\s+ten|\s+name)\s*:\s*(.+)", text)
+        fullname=None
+        if not fullname_match: 
+            idx2cham= text.find(":")
+            if idx2cham > -1:
+                fullname = text[idx2cham+1:].strip()
+        else:
+            fullname = fullname_match.group(1).strip()
+
+
+        if not fullname or fullname=="":
+            raise ValueError("Không tìm thấy tên, cần theo mẫu vd: @username tên: fullname here")
+                    
+        if self.message.entities:
+            for entity in self.message.entities:
+                if str(entity["type"]).lower() == "text_mention":
+                    username = ""   
+                    try:
+                        username = entity["user"]["username"] or ""   
+                    except:
+                        pass
+                    # fullname = entity["user"]["first_name"] + " " + entity["user"]["last_name"]
+                    return {
+                        "id": entity["user"]["id"],
+                        "username": username,
+                        "fullname": fullname,
+                        "is_bot": entity["user"]["is_bot"],
+                        "first_name": entity["user"]["first_name"],
+                        "last_name": entity["user"]["last_name"]
+                    }
+        
+        # Handle username in text (e.g., @badpaybad)
+        username_match = re.search(r"@(\w+)", text)
+        if not username_match:
+            # raise ValueError("Không tìm thấy username thiếu @ vd @username tên: fullname here")
+
+            fromuser= self.get_from_user()
+            user_id = fromuser.id if fromuser else None
+            first_name = fromuser.first_name if fromuser else None
+            last_name = fromuser.last_name if fromuser else None
+            is_bot = fromuser.is_bot if fromuser else None
+
+            return {
+                "id": user_id,
+                "username": username,
+                "fullname": fullname,
+                "is_bot": is_bot,
+                "first_name": first_name,
+                "last_name": last_name
+            }
+            
+        username = username_match.group(1)
+
+        return {
+            "id": None,
+            "username": username,
+            "fullname": fullname,
+            "is_bot": None,
+            "first_name": None,
+            "last_name": None
+        }
+
 
 class OrchestrationMessage(BaseModel):
     message: TelegramUpdate|None=None
