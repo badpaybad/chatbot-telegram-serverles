@@ -335,7 +335,8 @@ async def open_zalo_group_omt_tbp(groupname:str="OMT-TBP"):
                 found =page.get_by_text(groupname)
             await asyncio.sleep(10)
     
-        await found.click(force=True, timeout=10000)
+        async with browser_lock:
+            await found.click(force=True, timeout=10000)
         
         while not isStop:
             async with browser_lock:
@@ -349,11 +350,13 @@ async def open_zalo_group_omt_tbp(groupname:str="OMT-TBP"):
         # msg=await page.inner_text("messageViewContainer")
         print("messageViewContainer",text)
 
+        count=0
+        chat_items=None
         async with browser_lock:
             chat_items = page.locator("div#messageViewContainer div.chat-item")
-        # Lấy số lượng tìm thấy
-        count = await chat_items.count()
-        print(f"Tìm thấy {count} tin nhắn.")
+            # Lấy số lượng tìm thấy
+            count = await chat_items.count()
+            print(f"Tìm thấy {count} tin nhắn.")
 
         listmsg=[]
         # todo: có thể dùng page scroll để lấy msg cũ
@@ -378,11 +381,13 @@ zalo_group_msg_ActionBlockQueue= asyncio.Queue()
 latest_zalo_group_msg_list_check_duplicate=[]
 
 async def loop_enqueue_processed_zalo_group_msg():
+    all_texts=[]
     while not isStop:
         all_texts=await open_zalo_group_omt_tbp("OMT-TBP")
-        if all_texts:
-            await zalo_group_msg_ActionBlockQueue.put({"groupname":"OMT-TBP", "message":all_texts})
-        await asyncio.sleep(10)
+
+    if all_texts:
+        await zalo_group_msg_ActionBlockQueue.put({"groupname":"OMT-TBP", "message":all_texts})
+    await asyncio.sleep(10)
     pass
 
 
@@ -435,7 +440,7 @@ async def loop():
     await browserActionBlockQueue.put(sync_zalo_chats_groups)
 
     await asyncio.gather( loop_run_browser_agent(),
-                        #   loop_enqueue_processed_zalo_group_msg(),
+                          loop_enqueue_processed_zalo_group_msg(),
                         #   loop_dequeue_processed_zalo_group_msg_into_telegram()
                           )
 
