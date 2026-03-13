@@ -104,18 +104,13 @@ async def loop_run_browser_agent():
 
                 nextact= await browserActionBlockQueue.get()
 
-                if not nextact:
-                    await asyncio.sleep(1)
-                    continue
-                
-                if asyncio.iscoroutinefunction(nextact):
-                    await nextact()
-                else :
-                    nextact()
+                if nextact:
+                    if asyncio.iscoroutinefunction(nextact):
+                        await nextact()
+                    else:
+                        nextact()
 
-
-            await asyncio.sleep(1)
-            print("Done")
+            print("loop_run_browser_agent: Done")
 
         except Exception as e:
             print(f"Lỗi loop_run_browser_agent: {e}")
@@ -308,73 +303,80 @@ async def check_zalo_qr_auth():
        
         pass
 
-#qr-container
-
-    pass
-# vi du action queue, khi cần làm j đó với 1 page đã được mở lên, không tạo mới page ko sợ mất session     
-# 
-
 async def open_zalo_group_omt_tbp(groupname:str="OMT-TBP"):
     async with browser_lock:
         await page.wait_for_load_state("networkidle")
     try:
-        
-        print("click OMT-TBP")
+        print(f"Opening group: {groupname}")
 
-        # page.locator("div:has-text('OMT-TBP')").click()
-        async with browser_lock:
-            found =page.get_by_text(groupname)
+        is_found = False
+        found = None
+        selectorGroupname = f'div.truncate:has-text("{groupname}")'
 
-        while not found:
-            if found:
-                break
-            
-            sync_zalo_chats_groups()
-
+        while not is_found and not isStop:
             async with browser_lock:
-                found =page.get_by_text(groupname)
-            await asyncio.sleep(10)
+                found = page.locator(selectorGroupname)
+                #found = page.get_by_text("OMT-TBP").filter(has=page.locator("div.truncate"))
+                is_found = await found.count() > 0
+            
+            if is_found:
+                print(f"Group {groupname} found", found)
+                break
+            else:
+                print(f"Group {groupname} not found, syncing...")
+                await sync_zalo_chats_groups()
+                await asyncio.sleep(5)
     
-        async with browser_lock:
-            await found.click(force=True, timeout=10000)
+        if is_found:
+            async with browser_lock:
+                # conv-item-title__name truncate grid-item
+                await found.click(force=True, timeout=10000)
+                print("clicked", groupname, found)
+            await asyncio.sleep(2)
         
         while not isStop:
             async with browser_lock:
-                text = await page.locator("div#messageViewContainer").text_content()
-            if  text:
-               break
+                # Check for container existence before getting text
+
+                print("đang tìm #messageViewContainer")
+                container = page.locator("div#messageViewContainer")
+                if not container and found:
+                    await found.click(force=True, timeout=10000)
+                    print("clicked 2", groupname, found)
+
+                    await asyncio.sleep(2)
+
+                if await container.count() > 0:
+                    text = await container.text_content(timeout=10000)
+                    if text:
+                        break
+                else:
+                    await found.click(force=True, timeout=10000)
+                    print("clicked 2", groupname, found)
+
+                    await asyncio.sleep(2)
             
             await asyncio.sleep(1)
 
-        # text = page.get_by_test_id("messageViewContainer").inner_text()
-        # msg=await page.inner_text("messageViewContainer")
-        print("messageViewContainer",text)
+        print("messageViewContainer loaded")
 
         count=0
         chat_items=None
         async with browser_lock:
             chat_items = page.locator("div#messageViewContainer div.chat-item")
-            # Lấy số lượng tìm thấy
             count = await chat_items.count()
-            print(f"Tìm thấy {count} tin nhắn.")
+            print(f"Found {count} messages.")
 
         listmsg=[]
-        # todo: có thể dùng page scroll để lấy msg cũ
-        # Lặp qua từng cái
         for i in range(count):
             item = chat_items.nth(i)
-            # print(f"Nội dung item {i}: {await item.inner_text()}")
-            listmsg.append(await item.inner_text())
+            listmsg.append(await item.inner_text(timeout=10000))
 
-        # all_texts = await page.locator("div#messageViewContainer div.chat-item").all_inner_texts()
-        # Kết quả trả về là một mảng: ['Tin nhắn 1', 'Tin nhắn 2', ...]
-        # print("all_texts",all_texts)
         return listmsg
 
-    except:
+    except Exception as e:
+        print(f"Error in open_zalo_group_omt_tbp: {e}")
         return None
-
-    pass
 
 zalo_group_msg_ActionBlockQueue= asyncio.Queue()
 
@@ -422,20 +424,21 @@ async def loop_dequeue_processed_zalo_group_msg_into_telegram():
             if batch_text_str in latest_zalo_group_msg_list_check_duplicate:
                 print(f"Bỏ qua batch trùng lặp ({len(batch)} items) từ {group_name}")
             else:
-                # Lưu vào lịch sử trùng lặp
-                latest_zalo_group_msg_list_check_duplicate.append(batch_text_str)
-                if len(latest_zalo_group_msg_list_check_duplicate) > 20:
-                    latest_zalo_group_msg_list_check_duplicate.pop(0)
-
-                print(f"Xử lý batch {len(batch)} items từ {group_name}: {len(all_messages)} tin nhắn")
-
                 # Lưu vào db
+                print(f"Xử lý batch {len(batch)} items từ {group_name}: {len(all_messages)} tin nhắn")
                 for msg in all_messages:
                     knowledgebase.dbcontext.zalo_all_message.insert({
                         "group": group_name,
                         "message": msg,
                         "timestamp": time.time(),
                 })
+
+                # Lưu vào lịch sử trùng lặp
+                latest_zalo_group_msg_list_check_duplicate.append(batch_text_str)
+                if len(latest_zalo_group_msg_list_check_duplicate) > 20:
+                    latest_zalo_group_msg_list_check_duplicate.pop(0)
+
+
             
             # Đánh dấu hoàn thành cho tất cả item trong batch
             for _ in range(len(batch)):
@@ -449,13 +452,31 @@ async def loop_dequeue_processed_zalo_group_msg_into_telegram():
 async def loop():
     global isStop
     
+    # 1. Start browser agent FIRST
+    browser_task = asyncio.create_task(loop_run_browser_agent())
+    
+    # 2. Wait for page to be initialized
+    print("Waiting for browser to initialize...")
+    while page is None:
+        if isStop: return
+        await asyncio.sleep(0.5)
+    
+    # 3. Queue initial tasks
     await browserActionBlockQueue.put(open_zalo_web)
     await browserActionBlockQueue.put(check_zalo_qr_auth)
     await browserActionBlockQueue.put(sync_zalo_chats_groups)
 
-    await asyncio.gather( loop_run_browser_agent(),
-                          loop_enqueue_processed_zalo_group_msg(),
-                          loop_dequeue_processed_zalo_group_msg_into_telegram()
-                          )
+    print("Browser initialized and tasks queued. Starting scraping loops...")
+    
+    await asyncio.gather(
+        browser_task,
+        loop_enqueue_processed_zalo_group_msg(),
+        loop_dequeue_processed_zalo_group_msg_into_telegram()
+    )
 
-asyncio.run(loop())
+if __name__ == "__main__":
+    try:
+        asyncio.run(loop())
+    except KeyboardInterrupt:
+        isStop = True
+        print("Stopping...")
