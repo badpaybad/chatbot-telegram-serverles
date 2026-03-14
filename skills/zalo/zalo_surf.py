@@ -118,6 +118,35 @@ async def loop_run_browser_agent():
             # await browser.close()
             await context.close()
             pass
+
+async def page_scroll():
+    async with browser_lock:
+        try:
+            await page.wait_for_load_state("networkidle", timeout=5000)
+        except Exception:
+            pass
+        for _ in range(3):
+            try:
+                await asyncio.wait_for(page.evaluate("window.scrollTo(0, document.body.scrollHeight)"), timeout=5.0)
+                # await page.keyboard.press("PageDown")
+                # await asyncio.sleep(1)
+                await asyncio.wait_for(page.evaluate("window.scrollTo(0, 0)"), timeout=5.0)
+                await page.keyboard.press("PageUp")
+                await asyncio.sleep(1)
+            except Exception:
+                pass
+        for _ in range(3):
+            try:
+                await asyncio.wait_for(page.evaluate("window.scrollTo(0, document.body.scrollHeight)"), timeout=5.0)
+                await page.keyboard.press("PageDown")
+                await asyncio.sleep(1)
+                # await asyncio.wait_for(page.evaluate("window.scrollTo(0, 0)"), timeout=5.0)
+                # await page.keyboard.press("PageUp")
+                # await asyncio.sleep(1)
+            except Exception:
+                pass
+    pass
+
 async def open_zalo_web():
 
     async with browser_lock:
@@ -127,19 +156,7 @@ async def open_zalo_web():
             await page.wait_for_load_state("networkidle", timeout=5000)
         except Exception as e:
             print(f"Lỗi khi open_zalo_web: {e}")
-        for _ in range(3):
-            try:
-                await asyncio.wait_for(page.evaluate("window.scrollTo(0, document.body.scrollHeight)"), timeout=5.0)
-                await page.keyboard.press("PageDown")
-                await asyncio.sleep(1)
-                await asyncio.wait_for(page.evaluate("window.scrollTo(0, 0)"), timeout=5.0)
-                await page.keyboard.press("PageUp")
-                await asyncio.sleep(1)
-            except Exception:
-                pass
-    await asyncio.sleep(3)
-
-
+    await page_scroll()
 
 async def download_qr_code():
 
@@ -148,17 +165,9 @@ async def download_qr_code():
             await page.wait_for_load_state("networkidle", timeout=5000)
         except Exception:
             pass
-        for _ in range(3):
-            try:
-                await asyncio.wait_for(page.evaluate("window.scrollTo(0, document.body.scrollHeight)"), timeout=5.0)
-                await page.keyboard.press("PageDown")
-                await asyncio.sleep(1)
-                await asyncio.wait_for(page.evaluate("window.scrollTo(0, 0)"), timeout=5.0)
-                await page.keyboard.press("PageUp")
-                await asyncio.sleep(1)
-            except Exception:
-                pass
-        file_name="zalo_qr.png"
+    await page_scroll()
+
+    file_name="zalo_qr.png"
     # 1. Tìm selector: tìm img bên trong class .qr-container
     qr_selector = ".qr-container img"
     
@@ -223,17 +232,8 @@ async def sync_zalo_chats_groups():
             await page.wait_for_load_state("networkidle", timeout=5000)
         except Exception:
             pass
-        for _ in range(3):
-            try:
-                await asyncio.wait_for(page.evaluate("window.scrollTo(0, document.body.scrollHeight)"), timeout=5.0)
-                await page.keyboard.press("PageDown")
-                await asyncio.sleep(1)
-                await asyncio.wait_for(page.evaluate("window.scrollTo(0, 0)"), timeout=5.0)
-                await page.keyboard.press("PageUp")
-                await asyncio.sleep(1)
-            except Exception:
-                pass
-    await asyncio.sleep(3)
+        
+    await page_scroll()
     try:
         # z--btn--v2 btn-primary small sync-v2-ok suggestNewSync --rounded sync-v2-ok suggestNewSync
         # await page.locator(".suggestNewSync.btn-primary", timeout=5000).click(force=True)
@@ -303,16 +303,8 @@ async def check_zalo_qr_auth():
             await page.wait_for_load_state("networkidle", timeout=5000)
         except Exception:
             pass
-        for _ in range(3):
-            try:
-                await asyncio.wait_for(page.evaluate("window.scrollTo(0, document.body.scrollHeight)"), timeout=5.0)
-                await page.keyboard.press("PageDown")
-                await asyncio.sleep(1)
-                await asyncio.wait_for(page.evaluate("window.scrollTo(0, 0)"), timeout=5.0)
-                await page.keyboard.press("PageUp")
-                await asyncio.sleep(1)
-            except Exception:
-                pass
+    
+    await page_scroll()
 
     # https://id.zalo.me/account?continue=https%3A%2F%2Fchat.zalo.me%2F
 
@@ -365,16 +357,8 @@ async def open_zalo_group_omt_tbp(groupname:str="OMT-TBP"):
             await page.wait_for_load_state("networkidle", timeout=5000)
         except Exception:
             pass
-        for _ in range(3):
-            try:
-                await asyncio.wait_for(page.evaluate("window.scrollTo(0, document.body.scrollHeight)"), timeout=5.0)
-                await page.keyboard.press("PageDown")
-                await asyncio.sleep(1)
-                await asyncio.wait_for(page.evaluate("window.scrollTo(0, 0)"), timeout=5.0)
-                await page.keyboard.press("PageUp")
-                await asyncio.sleep(1)
-            except Exception:
-                pass
+    
+    await page_scroll()
     try:
         print(f"Opening group: {groupname}")
 
@@ -518,7 +502,7 @@ async def open_zalo_group_omt_tbp(groupname:str="OMT-TBP"):
                             pass
                             
                     print("Đang cuộn #chatViewContainer xuống vài lần...")
-                    for _ in range(5):
+                    for _ in range(6):
                         try:
                             await asyncio.wait_for(container.evaluate('''node => {
                                 let scrollNode = node.querySelector('#messageViewContainer .transform-gpu');
@@ -585,9 +569,10 @@ async def open_zalo_group_omt_tbp(groupname:str="OMT-TBP"):
         print(f"Error in open_zalo_group_omt_tbp: {e}")
         return None
 
-zalo_group_msg_ActionBlockQueue= asyncio.Queue()
 
 latest_zalo_group_msg_list_check_duplicate=[]
+
+max_zalo_message_memory=1000
 
 async def zalo_all_message_last_30_msg_in_db_to_check_duplicate(groupname="OMT-TBP"):
 
@@ -605,73 +590,73 @@ async def zalo_all_message_last_30_msg_in_db_to_check_duplicate(groupname="OMT-T
         latest_zalo_group_msg_list_check_duplicate.append(batch_text_str)
     
 
+
+async def process_1_zalo_msg_in_group_into_telegram(txt):
+    
+    try:
+        batch = []
+        if txt:
+            batch.append(txt)
+        
+        # # Thử lấy thêm tối đa 2 item nữa nếu có sẵn trong queue để gom thành batch 3
+        # for _ in range(2):
+        #     if not zalo_group_msg_ActionBlockQueue.empty():
+        #         next_txt = await zalo_group_msg_ActionBlockQueue.get()
+        #         if next_txt:
+        #             batch.append(next_txt)
+        #     else:
+        #         break
+        
+        if not batch:
+            return
+
+        # Gom tất cả tin nhắn trong batch để check duplicate
+        all_messages = []
+        for item in batch:
+            all_messages.append(item["message"])
+        
+        group_name = batch[0]["groupname"]
+        # Chuyển batch thành chuỗi duy nhất để so khớp
+        batch_text_str = f"{group_name}: " + " | ".join(all_messages)
+
+        if batch_text_str in latest_zalo_group_msg_list_check_duplicate:
+            print(f"Bỏ qua batch trùng lặp ({len(batch)} items) từ {group_name}")
+        else:
+            # Lưu vào db
+            print(f"Xử lý batch {len(batch)} items từ {group_name}: {len(all_messages)} tin nhắn")
+            for msg in all_messages:
+                # todo: nếu cần transform trước khi lưu db
+                
+                knowledgebase.dbcontext.zalo_all_message.insert({
+                    "groupname": group_name,
+                    "message": msg,
+                    })
+                # print("inserted ----->", msg)
+
+            # Lưu vào lịch sử trùng lặp
+            latest_zalo_group_msg_list_check_duplicate.append(batch_text_str)
+            if len(latest_zalo_group_msg_list_check_duplicate) > max_zalo_message_memory:
+                latest_zalo_group_msg_list_check_duplicate.pop(0)
+        
+    except Exception as e:
+        print(f"Lỗi trong process_1_zalo_msg_in_group_into_telegram: {e}")
+
+
+
 async def loop_enqueue_processed_zalo_group_msg(groupname="OMT-TBP"):
+    global max_zalo_message_memory
     while not isStop:
         all_texts = await open_zalo_group_omt_tbp(groupname)
         if all_texts:
+            if len(all_texts) > max_zalo_message_memory:
+                max_zalo_message_memory=len(all_texts)
+                print("max_zalo_message_memory", max_zalo_message_memory)
             for msg in all_texts:
-                await zalo_group_msg_ActionBlockQueue.put({"groupname": groupname, "message": msg})
+                await process_1_zalo_msg_in_group_into_telegram({"groupname": groupname, "message": msg})
+
         await asyncio.sleep(30)
     pass
 
-
-async def loop_dequeue_processed_zalo_group_msg_into_telegram():
-    while not isStop:
-        try:
-            batch = []
-            # Chờ lấy ít nhất 1 item từ queue
-            txt = await zalo_group_msg_ActionBlockQueue.get()
-            if txt:
-                batch.append(txt)
-            
-            # # Thử lấy thêm tối đa 2 item nữa nếu có sẵn trong queue để gom thành batch 3
-            # for _ in range(2):
-            #     if not zalo_group_msg_ActionBlockQueue.empty():
-            #         next_txt = await zalo_group_msg_ActionBlockQueue.get()
-            #         if next_txt:
-            #             batch.append(next_txt)
-            #     else:
-            #         break
-            
-            if not batch:
-                continue
-
-            # Gom tất cả tin nhắn trong batch để check duplicate
-            all_messages = []
-            for item in batch:
-                all_messages.append(item["message"])
-            
-            group_name = batch[0]["groupname"]
-            # Chuyển batch thành chuỗi duy nhất để so khớp
-            batch_text_str = f"{group_name}: " + " | ".join(all_messages)
-
-            if batch_text_str in latest_zalo_group_msg_list_check_duplicate:
-                print(f"Bỏ qua batch trùng lặp ({len(batch)} items) từ {group_name}")
-            else:
-                # Lưu vào db
-                print(f"Xử lý batch {len(batch)} items từ {group_name}: {len(all_messages)} tin nhắn")
-                for msg in all_messages:
-
-                    knowledgebase.dbcontext.zalo_all_message.insert({
-                        "groupname": group_name,
-                        "message": msg,
-                        })
-                    # print("inserted ----->", msg)
-
-                # Lưu vào lịch sử trùng lặp
-                latest_zalo_group_msg_list_check_duplicate.append(batch_text_str)
-                if len(latest_zalo_group_msg_list_check_duplicate) > 100:
-                    latest_zalo_group_msg_list_check_duplicate.pop(0)
-            
-            # Đánh dấu hoàn thành cho tất cả item trong batch
-            for _ in range(len(batch)):
-                zalo_group_msg_ActionBlockQueue.task_done()
-
-        except Exception as e:
-            print(f"Lỗi trong loop_dequeue: {e}")
-
-        await asyncio.sleep(1)
-    pass
 
 async def loop():
     global isStop
@@ -698,8 +683,7 @@ async def loop():
     
     await asyncio.gather(
         browser_task,
-        loop_enqueue_processed_zalo_group_msg(zalo_group_name),
-        loop_dequeue_processed_zalo_group_msg_into_telegram()
+        loop_enqueue_processed_zalo_group_msg(zalo_group_name)
     )
 
 if __name__ == "__main__":
