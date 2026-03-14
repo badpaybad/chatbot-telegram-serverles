@@ -78,7 +78,7 @@ async def loop_run_browser_agent():
             # # Playwright có cơ chế thông minh: nhấn và đợi URL thay đổi
             # await asyncio.gather(
                 # page.click('#checkBtn'),
-            #     #page.wait_for_url("**/dashboard", timeout=10000) # Đợi tới khi URL chứa chữ 'dashboard'
+            #     #page.wait_for_url("**/dashboard", timeout=5000) # Đợi tới khi URL chứa chữ 'dashboard'
             # )
 
             # # 5. Đợi nội dung ở trang mới load xong
@@ -122,8 +122,21 @@ async def open_zalo_web():
 
     async with browser_lock:
         print("Đang mở trang đăng nhập...")
-        await page.goto("https://chat.zalo.me/")
-        await page.wait_for_load_state("networkidle")
+        try:
+            await page.goto("https://chat.zalo.me/", timeout=15000)
+            await page.wait_for_load_state("networkidle", timeout=5000)
+        except Exception as e:
+            print(f"Lỗi khi open_zalo_web: {e}")
+        for _ in range(3):
+            try:
+                await asyncio.wait_for(page.evaluate("window.scrollTo(0, document.body.scrollHeight)"), timeout=5.0)
+                await page.keyboard.press("PageDown")
+                await asyncio.sleep(1)
+                await asyncio.wait_for(page.evaluate("window.scrollTo(0, 0)"), timeout=5.0)
+                await page.keyboard.press("PageUp")
+                await asyncio.sleep(1)
+            except Exception:
+                pass
     await asyncio.sleep(3)
 
 
@@ -131,25 +144,41 @@ async def open_zalo_web():
 async def download_qr_code():
 
     async with browser_lock:
-        await page.wait_for_load_state("networkidle")
+        try:
+            await page.wait_for_load_state("networkidle", timeout=5000)
+        except Exception:
+            pass
+        for _ in range(3):
+            try:
+                await asyncio.wait_for(page.evaluate("window.scrollTo(0, document.body.scrollHeight)"), timeout=5.0)
+                await page.keyboard.press("PageDown")
+                await asyncio.sleep(1)
+                await asyncio.wait_for(page.evaluate("window.scrollTo(0, 0)"), timeout=5.0)
+                await page.keyboard.press("PageUp")
+                await asyncio.sleep(1)
+            except Exception:
+                pass
         file_name="zalo_qr.png"
     # 1. Tìm selector: tìm img bên trong class .qr-container
     qr_selector = ".qr-container img"
     
     try:
         # Đợi QR xuất hiện
-        # await page.wait_for_selector(qr_selector, timeout=10000)
+        # await page.wait_for_selector(qr_selector, timeout=5000)
         
         async with browser_lock:
             # 2. Lấy thuộc tính src của thẻ img
-            qr_src = await page.locator(qr_selector).get_attribute("src")
+            try:
+                qr_src = await page.locator(qr_selector).get_attribute("src", timeout=5000)
+            except:
+                qr_src = None
                     
         if not qr_src:
             print("Không tìm thấy thuộc tính src của QR")
 
             try:    
                 async with browser_lock:
-                    await page.get_by_text("Đã hiểu").click(force=True)    
+                    await page.get_by_text("Đã hiểu").click(force=True, timeout=5000)    
                     print(f"Click nút Đã hiểu") 
 
                 await asyncio.sleep(3)
@@ -158,7 +187,7 @@ async def download_qr_code():
             
 
             async with browser_lock:
-                qr_src = await page.locator(qr_selector).get_attribute("src", timeout=10000)    
+                qr_src = await page.locator(qr_selector).get_attribute("src", timeout=5000)    
 
             if not qr_src:
                 print("Không tìm thấy thuộc tính src của QR")
@@ -190,31 +219,44 @@ async def sync_zalo_chats_groups():
     print("sync_zalo_chats_groups doing")
 
     async with browser_lock:
-        await page.wait_for_load_state("networkidle")
+        try:
+            await page.wait_for_load_state("networkidle", timeout=5000)
+        except Exception:
+            pass
+        for _ in range(3):
+            try:
+                await asyncio.wait_for(page.evaluate("window.scrollTo(0, document.body.scrollHeight)"), timeout=5.0)
+                await page.keyboard.press("PageDown")
+                await asyncio.sleep(1)
+                await asyncio.wait_for(page.evaluate("window.scrollTo(0, 0)"), timeout=5.0)
+                await page.keyboard.press("PageUp")
+                await asyncio.sleep(1)
+            except Exception:
+                pass
     await asyncio.sleep(3)
     try:
         # z--btn--v2 btn-primary small sync-v2-ok suggestNewSync --rounded sync-v2-ok suggestNewSync
-        # await page.locator(".suggestNewSync.btn-primary", timeout=10000).click(force=True)
+        # await page.locator(".suggestNewSync.btn-primary", timeout=5000).click(force=True)
 
         async with browser_lock:
             # Đợi cho tới khi DOM của trang mới thực sự sẵn sàng
-            await page.wait_for_selector(".sync-v2-banner.suggestNewSync", state="attached", timeout=10000)
-            await page.locator(".sync-v2-banner.suggestNewSync").click(force=True)
+            await page.wait_for_selector(".sync-v2-banner.suggestNewSync", state="attached", timeout=5000)
+            await page.locator(".sync-v2-banner.suggestNewSync").click(force=True, timeout=5000)
 
     except Exception as e:
         print(f"Không tìm thấy nút Đồng bộ ngay .suggestNewSync.btn-primary")
     try:
         # tds-conversation__footer-content-sync-button
         async with browser_lock:
-            await page.wait_for_selector(".tds-conversation__footer-content-sync-button", state="attached", timeout=10000)
-            await page.locator(".tds-conversation__footer-content-sync-button").click(force=True)
+            await page.wait_for_selector(".tds-conversation__footer-content-sync-button", state="attached", timeout=5000)
+            await page.locator(".tds-conversation__footer-content-sync-button").click(force=True, timeout=5000)
 
     except Exception as e:
         print(f"Không tìm thấy nút Đồng bộ ngay .tds-conversation__footer-content-sync-button")
 
     try:
         async with browser_lock:
-            await page.get_by_text("Nhấn để đồng bộ ngay", timeout=10000).click(force=True)    
+            await page.get_by_text("Nhấn để đồng bộ ngay", timeout=5000).click(force=True)    
             print(f"Click nút Nhấn để đồng bộ ngay") 
 
         await asyncio.sleep(3)
@@ -222,7 +264,7 @@ async def sync_zalo_chats_groups():
         print(f"Không tìm thấy nút Nhấn để đồng bộ ngay")
     try:
         async with browser_lock:
-            await page.get_by_text("Đồng bộ ngay", timeout=10000).click(force=True)    
+            await page.get_by_text("Đồng bộ ngay", timeout=5000).click(force=True)    
             print(f"Click nút Đồng bộ ngay") 
 
         await asyncio.sleep(3)
@@ -236,7 +278,7 @@ async def sync_zalo_chats_groups():
         while not isStop:
             try:
                 async with browser_lock:
-                    found=await page.wait_for_selector(qr_selector, timeout=10000)
+                    found=await page.wait_for_selector(qr_selector, timeout=5000)
                 if found:
                     print("Đang đồng bộ")
                     await asyncio.sleep(10)
@@ -257,7 +299,20 @@ async def sync_zalo_chats_groups():
 async def check_zalo_qr_auth():
 
     async with browser_lock:
-        await page.wait_for_load_state("networkidle")
+        try:
+            await page.wait_for_load_state("networkidle", timeout=5000)
+        except Exception:
+            pass
+        for _ in range(3):
+            try:
+                await asyncio.wait_for(page.evaluate("window.scrollTo(0, document.body.scrollHeight)"), timeout=5.0)
+                await page.keyboard.press("PageDown")
+                await asyncio.sleep(1)
+                await asyncio.wait_for(page.evaluate("window.scrollTo(0, 0)"), timeout=5.0)
+                await page.keyboard.press("PageUp")
+                await asyncio.sleep(1)
+            except Exception:
+                pass
 
     # https://id.zalo.me/account?continue=https%3A%2F%2Fchat.zalo.me%2F
 
@@ -268,7 +323,7 @@ async def check_zalo_qr_auth():
     while not isStop:
         try:
             async with browser_lock:
-                found=await page.wait_for_selector(qr_selector, timeout=10000)
+                found=await page.wait_for_selector(qr_selector, timeout=5000)
             if found:
                 print("QR code đã ẩn, đã vào trang chat")
 
@@ -304,23 +359,96 @@ async def check_zalo_qr_auth():
         pass
 
 async def open_zalo_group_omt_tbp(groupname:str="OMT-TBP"):
+
     async with browser_lock:
-        await page.wait_for_load_state("networkidle")
+        try:
+            await page.wait_for_load_state("networkidle", timeout=5000)
+        except Exception:
+            pass
+        for _ in range(3):
+            try:
+                await asyncio.wait_for(page.evaluate("window.scrollTo(0, document.body.scrollHeight)"), timeout=5.0)
+                await page.keyboard.press("PageDown")
+                await asyncio.sleep(1)
+                await asyncio.wait_for(page.evaluate("window.scrollTo(0, 0)"), timeout=5.0)
+                await page.keyboard.press("PageUp")
+                await asyncio.sleep(1)
+            except Exception:
+                pass
     try:
         print(f"Opening group: {groupname}")
 
+        async with browser_lock:
+            try:
+                search_input = page.locator('#contact-search-input')
+                await search_input.fill(groupname, timeout=5000)
+                await search_input.press('Enter', timeout=5000)
+                await asyncio.sleep(1)
+            except Exception as e:
+                print(f"Error searching for groupname: {e}")
+
         is_found = False
         found = None
-        selectorGroupname = f'div.truncate:has-text("{groupname}")'
+        # Use a more robust selector or exact text text=
+        selectorGroupname = f'span.truncate:has-text("{groupname}"), div.truncate:has-text("{groupname}")'
 
         while not is_found and not isStop:
             async with browser_lock:
-                found = page.locator(selectorGroupname)
-                #found = page.get_by_text("OMT-TBP").filter(has=page.locator("div.truncate"))
-                is_found = await found.count() > 0
+                container_scroll = page.locator('#conversationListId').first
+                if await container_scroll.count() > 0:
+                    print("Đang cuộn #conversationListId để tìm group...")
+                    if not is_found:
+                        # Cuộn xuống
+                        for _ in range(5):
+                            found = page.locator(selectorGroupname)
+                            if await found.count() > 0:
+                                is_found = True
+                                break
+                            try:
+                                await asyncio.wait_for(container_scroll.evaluate('''node => {
+                                    node.scrollTop += 800;
+                                    if (node.parentElement) {
+                                        node.parentElement.scrollTop += 800;
+                                    }
+                                    let children = node.querySelectorAll('*');
+                                    for (let child of children) {
+                                        if (child.scrollHeight > child.clientHeight) {
+                                            child.scrollTop += 800;
+                                        }
+                                    }
+                                }'''), timeout=5.0)
+                                await asyncio.sleep(1)
+                            except: pass
+                    
+                    # Cuộn lên trước vài lần
+                    for _ in range(5):
+                        found = page.locator(selectorGroupname)
+                        if await found.count() > 0:
+                            is_found = True
+                            break
+                        try:
+                            await asyncio.wait_for(container_scroll.evaluate('''node => {
+                                node.scrollTop -= 800;
+                                if (node.parentElement) {
+                                    node.parentElement.scrollTop -= 800;
+                                }
+                                let children = node.querySelectorAll('*');
+                                for (let child of children) {
+                                    if (child.scrollHeight > child.clientHeight) {
+                                        child.scrollTop -= 800;
+                                    }
+                                }
+                            }'''), timeout=5.0)
+                            await asyncio.sleep(1)
+                        except: pass
+                    
+                else:
+                    found = page.locator(selectorGroupname)
+                    is_found = await found.count() > 0
             
             if is_found:
                 print(f"Group {groupname} found", found)
+
                 break
             else:
                 print(f"Group {groupname} not found, syncing...")
@@ -330,8 +458,8 @@ async def open_zalo_group_omt_tbp(groupname:str="OMT-TBP"):
         if is_found:
             async with browser_lock:
                 # conv-item-title__name truncate grid-item
-                await found.click(force=True, timeout=10000)
-                await found.click(force=True, timeout=10000)
+                await found.click(force=True, timeout=5000)
+                await found.click(force=True, timeout=5000)
                 print("clicked", groupname, found)
             await asyncio.sleep(2)
         
@@ -339,40 +467,117 @@ async def open_zalo_group_omt_tbp(groupname:str="OMT-TBP"):
             async with browser_lock:
                 # Check for container existence before getting text
 
-                print("đang tìm #messageViewContainer")
-                container = page.locator("div#messageViewContainer")
-                if not container and found:
-                    await found.click(force=True, timeout=10000)
-                    await found.click(force=True, timeout=10000)
-                    print("clicked 2", groupname, found)
+                print("đang tìm #chatViewContainer")
+                container_count=0
+                try:
+                    # Check if it exists without waiting indefinitely
+                    await page.wait_for_selector("#chatViewContainer", timeout=2000)
+                    container_count = await page.locator("#chatViewContainer").count()
+                except:
+                    container_count = 0
+                    print("Không tìm thấy #chatViewContainer")
+                
+                if container_count == 0 and found:
+                    try:
+                        await found.click(force=True, timeout=5000)
+                        await found.click(force=True, timeout=5000)
+                        print("clicked 2", groupname, found)
+                    except Exception as e:
+                        print(f"Lỗi khi click lại group lần 2: {e}")
 
                     await asyncio.sleep(2)
 
-                if await container.count() > 0:
-                    text = await container.text_content(timeout=10000)
-                    if text:
-                        break
+                if container_count > 0:
+                    container = page.locator("#chatViewContainer")
+
+                    print("đã tìm thấy chatViewContainer", container)
+                    # # Cuộn vùng container lên xuống để load hết nội dung
+                    print("Đang cuộn #chatViewContainer lên vài lần...")
+                    for _ in range(5):
+                        try:
+                            await asyncio.wait_for(container.evaluate('''node => {
+                                let scrollNode = node.querySelector('#messageViewContainer .transform-gpu');
+                                if (scrollNode) {
+                                    scrollNode.scrollBy({top: -2800, behavior: 'smooth'});
+                                } else {
+                                    node.scrollTop -= 2800;
+                                    if (node.parentElement) {
+                                        node.parentElement.scrollTop -= 2800;
+                                    }
+                                    let children = node.querySelectorAll('*');
+                                    for (let child of children) {
+                                        if (child.scrollHeight > child.clientHeight && window.getComputedStyle(child).overflowY !== 'hidden') {
+                                            child.scrollTop -= 2800;
+                                        }
+                                    }
+                                }
+                            }'''), timeout=5.0)
+                            await asyncio.sleep(1)
+                        except Exception as e:
+                            print(f"Lỗi khi cuộn container lên: {e}")
+                            pass
+                            
+                    print("Đang cuộn #chatViewContainer xuống vài lần...")
+                    for _ in range(5):
+                        try:
+                            await asyncio.wait_for(container.evaluate('''node => {
+                                let scrollNode = node.querySelector('#messageViewContainer .transform-gpu');
+                                if (scrollNode) {
+                                    scrollNode.scrollBy({top: 2800, behavior: 'smooth'});
+                                } else {
+                                    node.scrollTop += 2800;
+                                    if (node.parentElement) {
+                                        node.parentElement.scrollTop += 2800;
+                                    }
+                                    let children = node.querySelectorAll('*');
+                                    for (let child of children) {
+                                        if (child.scrollHeight > child.clientHeight && window.getComputedStyle(child).overflowY !== 'hidden') {
+                                            child.scrollTop += 2800;
+                                        }
+                                    }
+                                }
+                            }'''), timeout=5.0)
+                            await asyncio.sleep(1)
+                        except Exception as e:
+                            print(f"Lỗi khi cuộn container xuống: {e}")
+                            pass
+                    
+
+                    print("đã cuộn chatViewContainer", container)
+                    break
+                    # try:
+                    #     text = await container.text_content(timeout=5000)
+                    #     if text and len(text.strip()) > 0:
+                    #         break
+                    #     else:
+                    #         print("Lấy được text_content nhưng nội dung trống, thử lại...")
+                    # except Exception as e:
+                    #     print(f"Lỗi khi lấy text_content của container: {e}")
                 else:
-                    await found.click(force=True, timeout=10000)
-                    print("clicked 2", groupname, found)
+                    if found:
+                        try:
+                            await found.click(force=True, timeout=5000)
+                            print("clicked 3", groupname, found)
+                        except Exception as e:
+                            print(f"Lỗi khi click lại group lần 3: {e}")
 
                     await asyncio.sleep(2)
             
             await asyncio.sleep(1)
 
-        print("messageViewContainer loaded")
+        print("chatViewContainer loaded")
 
         count=0
         chat_items=None
         async with browser_lock:
-            chat_items = page.locator("div#messageViewContainer div.chat-item")
+            chat_items = page.locator("#chatViewContainer div.chat-item")
             count = await chat_items.count()
-            print(f"div#messageViewContainer div.chat-item Found {count} messages.")
+            print(f"#chatViewContainer div.chat-item Found {count} messages.")
 
         listmsg=[]
         for i in range(count):
             item = chat_items.nth(i)
-            listmsg.append(await item.inner_text(timeout=10000))
+            listmsg.append(await item.inner_text(timeout=5000))
 
         return listmsg
 
