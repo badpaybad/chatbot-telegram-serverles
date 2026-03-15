@@ -597,6 +597,7 @@ async def zalo_all_message_last_30_msg_in_db_to_check_duplicate(groupname="OMT-T
 async def process_1_zalo_msg_in_group_into_telegram(txt):
     
     try:
+
         batch = []
         if txt:
             batch.append(txt)
@@ -619,6 +620,10 @@ async def process_1_zalo_msg_in_group_into_telegram(txt):
             all_messages.append(item["message"])
         
         group_name = batch[0]["groupname"]
+
+        if group_name not in latest_zalo_group_msg_list_check_duplicate:
+            latest_zalo_group_msg_list_check_duplicate[group_name]=[]
+
         # Chuyển batch thành chuỗi duy nhất để so khớp
         batch_text_str = f"{group_name}: " + " | ".join(all_messages)
 
