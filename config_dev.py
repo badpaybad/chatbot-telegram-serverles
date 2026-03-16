@@ -36,3 +36,8 @@ SWAKSRC="""
 --auth-password youpassword 
 --tls
 """
+
+sftp_host = ""
+sftp_port = 22
+sftp_username = ""
+sftp_password = ""

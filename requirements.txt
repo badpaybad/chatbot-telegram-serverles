@@ -25,3 +25,4 @@ Pyrogram
 matplotlib
 transformers 
 sentence_transformers 
+paramiko
