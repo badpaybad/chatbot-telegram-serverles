@@ -9,3 +9,5 @@ Khi làm đúng cần khen ngợi và có thể gợi ý thêm cách làm nếu 
 Tạo web html5 tương tác với học sinh và sinh động cuốn hút.
 
 Bạn tạo 1 folder skill toan4 trong đó có plan.md để trình bày cách bạn định làm, task.md để làm thành game thật, khi tôi đưa một ảnh và yêu cầu dùng skill toan4 tôi sẽ có 1 folder game tương đương với tên ảnh
+
+đọc các thông số ở games/toanlop4/config.md để dùng sfpt đẩy game vừa tạo lên server folder /work/nginxstaticfile/games/maths/{tên tương đương với ảnh}

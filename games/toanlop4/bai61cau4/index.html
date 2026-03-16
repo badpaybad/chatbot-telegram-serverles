@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giải Ô Chữ Về Các Hành Tinh</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="game-container">
+        <header>
+            <h1>Giải Ô Chữ Dưới Đây!</h1>
+            <p>Em hãy kéo các chữ cái tương ứng với kết quả phép tính vào ô trống để giải mã tên một hành tinh nhé!</p>
+        </header>
+
+        <main>
+            <!-- Planet target container -->
+            <section class="puzzle-section" id="puzzle-board">
+                <div class="word-group" id="word-1">
+                    <div class="puzzle-slot" data-expected="S">
+                        <div class="target-value"><span>5</span><span>18</span></div>
+                        <div class="drop-zone" id="slot-1"></div>
+                    </div>
+                    <div class="puzzle-slot" data-expected="A">
+                        <div class="target-value"><span>1</span><span>9</span></div>
+                        <div class="drop-zone" id="slot-2"></div>
+                    </div>
+                    <div class="puzzle-slot" data-expected="O">
+                        <div class="target-value"><span>1</span><span>18</span></div>
+                        <div class="drop-zone" id="slot-3"></div>
+                    </div>
+                </div>
+                
+                <div class="word-group" id="word-2">
+                    <div class="puzzle-slot" data-expected="T">
+                        <div class="target-value"><span>4</span><span>11</span></div>
+                        <div class="drop-zone" id="slot-4"></div>
+                    </div>
+                    <div class="puzzle-slot" data-expected="H">
+                        <div class="target-value"><span>4</span><span>9</span></div>
+                        <div class="drop-zone" id="slot-5"></div>
+                    </div>
+                    <div class="puzzle-slot" data-expected="Ổ">
+                        <div class="target-value"><span>9</span><span>22</span></div>
+                        <div class="drop-zone" id="slot-6"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Cards containing expressions and letters -->
+            <section class="cards-section" id="cards-container">
+                <div class="draggable-card" draggable="true" data-letter="A">
+                    <div class="letter">A</div>
+                    <div class="expression">
+                        <div class="fraction"><span>5</span><span>18</span></div>
+                        <span class="op">-</span>
+                        <div class="fraction"><span>1</span><span>6</span></div>
+                    </div>
+                </div>
+                <div class="draggable-card" draggable="true" data-letter="H">
+                    <div class="letter">H</div>
+                    <div class="expression">
+                        <div class="fraction"><span>3</span><span>6</span></div>
+                        <span class="op">-</span>
+                        <div class="fraction"><span>1</span><span>18</span></div>
+                    </div>
+                </div>
+                <div class="draggable-card" draggable="true" data-letter="S">
+                    <div class="letter">S</div>
+                    <div class="expression">
+                        <div class="fraction"><span>2</span><span>9</span></div>
+                        <span class="op">+</span>
+                        <div class="fraction"><span>1</span><span>18</span></div>
+                    </div>
+                </div>
+                <div class="draggable-card" draggable="true" data-letter="O">
+                    <div class="letter">O</div>
+                    <div class="expression">
+                        <div class="fraction"><span>7</span><span>18</span></div>
+                        <span class="op">-</span>
+                        <div class="fraction"><span>5</span><span>18</span></div>
+                        <span class="op">-</span>
+                        <div class="fraction"><span>1</span><span>18</span></div>
+                    </div>
+                </div>
+                <div class="draggable-card" draggable="true" data-letter="Ổ">
+                    <div class="letter">Ổ</div>
+                    <div class="expression" style="font-size: 14px;">
+                        <div class="fraction"><span>5</span><span>22</span></div>
+                        <span class="op">+</span>
+                        <div class="fraction"><span>7</span><span>22</span></div>
+                        <span class="op">-</span>
+                        <div class="fraction"><span>3</span><span>22</span></div>
+                    </div>
+                </div>
+                <div class="draggable-card" draggable="true" data-letter="T">
+                    <div class="letter">T</div>
+                    <div class="expression" style="font-size: 14px;">
+                        <div class="fraction"><span>2</span><span>22</span></div>
+                        <span class="op">+</span>
+                        <div class="fraction"><span>7</span><span>22</span></div>
+                        <span class="op">-</span>
+                        <div class="fraction"><span>1</span><span>22</span></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <section class="feedback-container">
+            <div class="planet-emoji" style="font-size: 100px; display: none;" id="planet-img">🪐</div>
+            <div id="character">
+                <img src="https://cdni.iconscout.com/illustration/premium/thumb/cute-robot-saying-hi-4632007-3850119.png" alt="Robot Hỗ trợ">
+            </div>
+            <div id="hint-box" class="hidden">
+                <p id="hint-text">Cùng giải toán nào! Tính các phép tính và kéo đáp án vào ô tương ứng!</p>
+            </div>
+        </section>
+
+        <!-- Confetti Canvas -->
+        <canvas id="canvas"></canvas>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

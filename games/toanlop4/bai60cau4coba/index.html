@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài toán Cô Ba - Phân số</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <header>
+            <h1>🌟 Cùng giải toán với Cô Ba 🌟</h1>
+        </header>
+
+        <section class="problem-display">
+            <div class="char-img">👩‍🦰👗</div>
+            <div class="problem-text">
+                <p>Cô Ba có một tấm vải. Cô dùng <strong>7/15</strong> tấm vải để may quần, <strong>4/15</strong> tấm vải để may áo và <strong>2/15</strong> tấm vải để may túi.</p>
+                <p class="question">Hỏi cô Ba đã dùng tất cả bao nhiêu phần tấm vải?</p>
+            </div>
+        </section>
+
+        <section class="interaction-area">
+            <div class="equation">
+                <div class="fraction">
+                    <span class="num">7</span>
+                    <hr>
+                    <span class="den">15</span>
+                </div>
+                <span class="operator">+</span>
+                <div class="fraction">
+                    <span class="num">4</span>
+                    <hr>
+                    <span class="den">15</span>
+                </div>
+                <span class="operator">+</span>
+                <div class="fraction">
+                    <span class="num">2</span>
+                    <hr>
+                    <span class="den">15</span>
+                </div>
+                <span class="operator">=</span>
+                <div class="fraction input-fraction">
+                    <input type="number" id="ans-num" placeholder="?">
+                    <hr>
+                    <input type="number" id="ans-den" placeholder="?">
+                </div>
+            </div>
+
+            <button id="check-btn">Kiểm tra ngay 🚀</button>
+        </section>
+
+        <section id="feedback-area" class="feedback-hidden">
+            <div id="feedback-icon"></div>
+            <p id="feedback-text"></p>
+        </section>
+    </div>
+
+    <!-- Cấu hình confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -12,3 +12,16 @@ fasttext
 requests
 fastapi
 uvicorn
+einops
+timm
+bs4 
+playwright
+pydantic 
+httpx 
+pynacl 
+google-genai
+telethon 
+Pyrogram
+matplotlib
+transformers 
+sentence_transformers 

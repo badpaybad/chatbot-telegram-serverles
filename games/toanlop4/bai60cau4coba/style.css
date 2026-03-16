@@ -1,0 +1,176 @@
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap');
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Quicksand', sans-serif;
+    background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-container {
+    background-color: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    width: 90%;
+    max-width: 600px;
+    padding: 30px;
+    text-align: center;
+    border: 4px solid #ffb8b8;
+}
+
+header h1 {
+    color: #ff6b6b;
+    font-size: 28px;
+    margin-bottom: 20px;
+    text-shadow: 1px 1px 2px rgba(255, 107, 107, 0.2);
+}
+
+.problem-display {
+    background-color: #fff9e6;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border: 2px dashed #ffd166;
+}
+
+.char-img {
+    font-size: 50px;
+}
+
+.problem-text {
+    text-align: left;
+    font-size: 18px;
+    color: #4a4e69;
+    line-height: 1.6;
+}
+
+.question {
+    font-weight: 700;
+    color: #264653;
+    margin-top: 10px;
+}
+
+.interaction-area {
+    margin-bottom: 20px;
+}
+
+.equation {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    font-size: 28px;
+    margin-bottom: 30px;
+    color: #2a9d8f;
+    font-weight: bold;
+}
+
+.fraction {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.fraction .num, .fraction .den {
+    padding: 5px;
+}
+
+.fraction hr {
+    width: 100%;
+    margin: 0;
+    border: 0;
+    border-top: 3px solid #2a9d8f;
+}
+
+.input-fraction input {
+    width: 60px;
+    height: 40px;
+    font-size: 24px;
+    text-align: center;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    font-family: 'Quicksand', sans-serif;
+    font-weight: bold;
+    color: #e76f51;
+    transition: all 0.3s;
+}
+
+.input-fraction hr {
+    margin: 5px 0;
+    border-top: 3px solid #e76f51;
+}
+
+.input-fraction input:focus {
+    outline: none;
+    border-color: #e76f51;
+    box-shadow: 0 0 8px rgba(231, 111, 81, 0.3);
+}
+
+#check-btn {
+    background-color: #4ecdc4;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 20px;
+    font-weight: bold;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(78, 205, 196, 0.4);
+    transition: transform 0.2s, background-color 0.2s;
+    font-family: inherit;
+}
+
+#check-btn:hover {
+    background-color: #45b7aa;
+    transform: translateY(-2px);
+}
+
+#check-btn:active {
+    transform: translateY(2px);
+}
+
+#feedback-area {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 600;
+    transition: all 0.5s ease;
+}
+
+.feedback-hidden {
+    opacity: 0;
+    pointer-events: none;
+    height: 0;
+    overflow: hidden;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.feedback-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.feedback-error {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+}
+
+#feedback-icon {
+    font-size: 40px;
+}

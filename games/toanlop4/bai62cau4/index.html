@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toán Lớp 4 - Bài 62 Câu 4</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <!-- Header & Avatar -->
+        <header class="game-header">
+            <div class="character-avatar">
+                <img src="https://api.dicebear.com/7.x/bottts/svg?seed=MathBot4&backgroundColor=b6e3f4" alt="Robot Toán Học">
+            </div>
+            <div class="header-content">
+                <h1>Thử thách Toán Học</h1>
+                <p>Hãy giúp mình giải bài toán này nhé!</p>
+            </div>
+        </header>
+
+        <!-- Question Area -->
+        <section class="question-board">
+            <div class="question-text">
+                Một cây gỗ dài <span class="fraction"><span class="numerator">17</span><span class="denominator">4</span></span> m. Rô-bốt cưa cây gỗ đó thành ba khúc. Biết rằng khúc gỗ thứ nhất dài <span class="fraction"><span class="numerator">3</span><span class="denominator">2</span></span> m, khúc gỗ thứ hai dài <span class="fraction"><span class="numerator">9</span><span class="denominator">8</span></span> m. Tính chiều dài của khúc gỗ còn lại.
+            </div>
+        </section>
+
+        <!-- Visual Aid Area (Sơ đồ đoạn thẳng) -->
+        <section class="visual-board">
+            <h3>Sơ đồ bài toán</h3>
+            <div class="diagram-container">
+                <div class="fraction-diagram">
+                    <div class="part part-1">
+                        <span class="part-label">Khúc 1:<br><span class="fraction-small"><span class="numerator">3</span><span class="denominator">2</span></span> m</span>
+                    </div>
+                    <div class="part part-2">
+                        <span class="part-label">Khúc 2:<br><span class="fraction-small"><span class="numerator">9</span><span class="denominator">8</span></span> m</span>
+                    </div>
+                    <div class="part part-3">
+                        <span class="part-label">Khúc 3:<br>? m</span>
+                    </div>
+                </div>
+                <div class="total-bracket">
+                    <div class="bracket-line"></div>
+                    <span class="total-label">Cây gỗ dài: <span class="fraction-small"><span class="numerator">17</span><span class="denominator">4</span></span> m</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interaction Area -->
+        <section class="interaction-area">
+            <div class="answer-card">
+                <h3>Chiều dài khúc gỗ còn lại là:</h3>
+                <div class="fraction-input-container">
+                    <div class="fraction-input-wrapper">
+                        <input type="number" id="ans-numerator" class="fraction-input numerator-input" placeholder="Tử số">
+                        <div class="fraction-line"></div>
+                        <input type="number" id="ans-denominator" class="fraction-input denominator-input" placeholder="Mẫu số">
+                    </div>
+                    <span class="unit-text">m</span>
+                </div>
+                <button id="check-btn" class="action-btn">Kiểm tra kết quả</button>
+            </div>
+        </section>
+
+        <!-- Hint / Feedback Message Area -->
+        <div id="feedback-message" class="message-box hidden">
+            <div class="message-icon">💡</div>
+            <div class="message-content" id="message-text"></div>
+        </div>
+
+        <!-- Success Modal (Hidden by default) -->
+        <div id="success-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="celebration-icon">🎉</div>
+                <h2>Tuyệt vời! Em đã trả lời đúng!</h2>
+                
+                <div class="solution-details">
+                    <h3>Chi tiết bài giải:</h3>
+                    <p>Chiều dài của khúc gỗ thứ nhất và thứ hai là:</p>
+                    <div class="math-eq">
+                        <span class="fraction-inline"><span class="numerator">3</span><span class="denominator">2</span></span> + 
+                        <span class="fraction-inline"><span class="numerator">9</span><span class="denominator">8</span></span> = 
+                        <span class="fraction-inline"><span class="numerator">21</span><span class="denominator">8</span></span> (m)
+                    </div>
+                    <p>Chiều dài của khúc gỗ còn lại là:</p>
+                    <div class="math-eq">
+                        <span class="fraction-inline"><span class="numerator">17</span><span class="denominator">4</span></span> - 
+                        <span class="fraction-inline"><span class="numerator">21</span><span class="denominator">8</span></span> = 
+                        <span class="fraction-inline"><span class="numerator">34</span><span class="denominator">8</span></span> - 
+                        <span class="fraction-inline"><span class="numerator">21</span><span class="denominator">8</span></span> = 
+                        <span class="fraction-inline"><span class="numerator">13</span><span class="denominator">8</span></span> (m)
+                    </div>
+                    <p class="final-answer">Đáp số: <span class="fraction-inline"><span class="numerator">13</span><span class="denominator">8</span></span> m</p>
+                </div>
+                <button id="close-modal-btn" class="action-btn secondary-btn">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confetti Library for Celebration -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
