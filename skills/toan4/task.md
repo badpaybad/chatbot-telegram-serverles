@@ -34,7 +34,7 @@ Khi được yêu cầu sử dụng `skill toan4` với một hình ảnh đầu
 - [ ] **Task 6: Triển khai lên Server qua SFTP**
   - Các file Python code sinh ra để sử dụng SSH hoặc SFTP **bắt buộc** phải import các cấu hình cần thiết từ `config_dunp.py` (bao gồm các key: `sftp_host`, `sftp_port`, `sftp_username`, `sftp_password`).
   - **Tuyệt đối không copy/hardcode** các value này vào các file khác để tránh nguy cơ bảo mật bị lộ mật khẩu.
-  - Chạy script dùng chung `python skills/toan4/utils/deploy_game.py {tên tương đương với ảnh}` để đẩy folder game vừa tạo lên server thay vì sinh code mới.
+  - Chạy script dùng chung `python skills/toan4/utils/deploy_game.py {tên tương đương với ảnh}` để đẩy folder game vừa tạo lên server thay vì sinh code mới. *Lưu ý: Quá trình đẩy file qua SFTP có thể bị treo hoặc chạy lâu do nghẽn mạng. AI nên cấu hình thời gian chờ WaitMsBeforeAsync thấp, cho chạy ngầm và dùng command_status để kiểm tra kết quả.*
   - Vị trí đường dẫn đích trên server: `/work/nginxstaticfile/games/maths/{tên tương đương với ảnh}`.
   - Có thể dùng luôn folder venv mà không cần chạy sandbox
   
