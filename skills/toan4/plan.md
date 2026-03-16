@@ -5,7 +5,7 @@ Tạo ra một quy trình (skill) tự động nhận diện bài toán lớp 4 
 
 ## Ý tưởng cốt lõi
 1. **Phân tích hình ảnh (Image Analysis / Vision):**
-   - Đọc và trích xuất nội dung văn bản, các số liệu, phép tính, và ý nghĩa của bài toán từ bức ảnh mà người dùng cung cấp.
+   - Đọc và trích xuất nội dung văn bản, các số liệu, phép tính, và ý nghĩa của bài toán từ bức ảnh mà người dùng cung cấp. Có thể lấy ra một phần hình ảnh để minh họa
    - Phân loại dạng toán lớp 4 (ví dụ: phân số, chu vi diện tích, toán đố chữ, v.v.).
 
 2. **Thiết kế Game (Game Design):**
@@ -29,5 +29,5 @@ Tạo ra một quy trình (skill) tự động nhận diện bài toán lớp 4 
 - **Bước 2:** AI phân tích đề toán, lập kịch bản sư phạm cho đề đó (Đâu là đáp án? Đâu là các lỗi dễ mắc? Lời khuyên là gì? Có gợi ý hướng dẫn hoàn thành và giải thích ý nghĩa bài tập không?).
 - **Bước 3:** AI sinh mã nguồn HTML/CSS/JS cho game tương ứng với kịch bản sư phạm.
 - **Bước 4:** Lưu toàn bộ mã nguồn vào một folder độc lập dành riêng cho minh họa của bức ảnh đó. Nếu không thể minh họa bằng html thì có thể cất ảnh trực tiếp để minh họa câu hỏi và câu trả lời 
-- **Bước 5:** Code Python thực hiện deploy qua SFTP **bắt buộc** phải import các cấu hình từ `config_dunp.py` (bao gồm `sftp_host, sftp_port, sftp_username, sftp_password`) để thực hiện kết nối SSH/SFTP. **Tuyệt đối không copy các giá trị này vào file code sinh ra** để tránh nguy cơ bảo mật lộ mật khẩu. Cần dùng script dùng chung `skills/toan4/utils/deploy_game.py {tên tương đương với ảnh}` để đẩy thư mục game vừa tạo lên server vào folder `/work/nginxstaticfile/games/maths/{tên tương đương với ảnh}`.
+- **Bước 5:** Code Python thực hiện deploy qua SFTP **bắt buộc** phải import các cấu hình từ `config_dunp.py` (bao gồm `sftp_host, sftp_port, sftp_username, sftp_password`) để thực hiện kết nối SSH/SFTP. **Tuyệt đối không copy các giá trị này vào file code sinh ra** để tránh nguy cơ bảo mật lộ mật khẩu. Cần dùng script dùng chung `skills/toan4/utils/deploy_game.py {tên tương đương với ảnh}` để đẩy thư mục game vừa tạo lên server vào folder `/work/nginxstaticfile/games/maths/{tên tương đương với ảnh}`. Có thể dùng luôn folder venv mà không cần chạy sandbox
 - **Bước 6:** Thông báo cho người dùng đường dẫn để mở web lên chơi thử tại: `https://static.airobotics.vn/games/maths/{tên tương đương với ảnh}/`

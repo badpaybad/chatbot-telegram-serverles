@@ -1,0 +1,400 @@
+:root {
+    --primary: #4a69bd;
+    --success: #78e08f;
+    --danger: #e55039;
+    --warning: #f6b93b;
+    --text: #2f3640;
+    --bg: #f1f2f6;
+    --card: #ffffff;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Nunito', sans-serif;
+}
+
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.game-container {
+    background: var(--card);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 950px;
+    overflow: hidden;
+    position: relative;
+    padding-bottom: 30px;
+}
+
+header {
+    background: var(--primary);
+    color: white;
+    padding: 20px 30px;
+    text-align: center;
+    border-bottom: 4px solid rgba(0,0,0,0.1);
+}
+
+header h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 5px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+.instruction {
+    font-size: 1.2rem;
+    font-weight: 600;
+    opacity: 0.9;
+}
+
+.main-content {
+    padding: 40px 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.test-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.label {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-right: 20px;
+    color: var(--primary);
+}
+
+.flow {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+}
+
+.shape-wrap {
+    width: 140px;
+    height: 140px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shape-wrap svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    overflow: visible;
+}
+
+.svg-shape {
+    stroke: #2f3640;
+    stroke-width: 2.5;
+    transition: all 0.3s ease;
+}
+
+.bg-white { fill: #ffffff; }
+.bg-blue { fill: #a4def5; }
+.bg-orange { fill: #fbd38d; }
+
+.data-fraction, .input-fraction {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Biểu diễn phân số cơ bản */
+.fraction {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.1;
+    font-weight: 800;
+    font-size: 1.8rem;
+    color: #2f3640;
+}
+.data-fraction .num, .data-fraction .den {
+    font-size: 1.8rem;
+    font-weight: 800;
+}
+.data-fraction .num {
+    border-bottom: 3px solid #2f3640;
+    padding: 0 8px;
+    margin-bottom: 2px;
+}
+
+.data-fraction .den {
+    padding-top: 2px;
+}
+
+.fraction.inline {
+    font-size: 1.2rem;
+    transform: translateY(3px);
+}
+.fraction.inline .num {
+    border-bottom: 2px solid #2f3640;
+    padding: 0 4px;
+}
+
+/* Ô nhập liệu */
+.input-fraction input {
+    width: 48px;
+    height: 38px;
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: 800;
+    font-family: 'Nunito', sans-serif;
+    border: 2px dashed #a4b0be;
+    border-radius: 8px;
+    outline: none;
+    transition: all 0.2s;
+    background: rgba(255,255,255,0.9);
+    color: var(--primary);
+}
+.input-fraction input:focus {
+    border-color: var(--primary);
+    border-style: solid;
+    box-shadow: 0 0 0 3px rgba(74, 105, 189, 0.2);
+}
+.input-fraction hr {
+    width: 60px;
+    border: none;
+    border-top: 3px solid #2f3640;
+    margin: 5px 0;
+    transition: all 0.2s;
+}
+
+/* Mũi tên và phép tính */
+.arrow-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 15px;
+    min-width: 60px;
+    margin-top: -20px;
+}
+
+.op {
+    font-size: 1.4rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #2f3640;
+}
+
+.arr {
+    font-size: 2.5rem;
+    line-height: 1;
+    margin-top: 5px;
+    color: #2f3640;
+}
+
+/* Các trạng thái tương tác đúng sai */
+@keyframes shake {
+  0%, 100% {transform: translateX(0);}
+  10%, 30%, 50%, 70%, 90% {transform: translateX(-5px);}
+  20%, 40%, 60%, 80% {transform: translateX(5px);}
+}
+
+.shape-wrap.error .svg-shape {
+    stroke: var(--danger);
+    stroke-width: 4;
+    animation: shake 0.5s;
+}
+
+.shape-wrap.correct .svg-shape {
+    stroke: var(--success);
+    stroke-width: 4;
+    fill: #eaffea;
+}
+
+.shape-wrap.correct .input-fraction input {
+    border-color: transparent;
+    background: transparent;
+    color: var(--success);
+}
+
+.shape-wrap.correct .input-fraction hr {
+    border-top-color: var(--success);
+}
+
+/* Nút kiểm tra */
+.actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 25px;
+}
+
+.btn-check {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    font-size: 1.4rem;
+    font-weight: 800;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(74, 105, 189, 0.4);
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-check:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(74, 105, 189, 0.6);
+}
+
+.btn-check:active {
+    transform: translateY(1px);
+}
+
+/* Khu vực gợi ý */
+.feedback-box {
+    margin: 10px 10px 0;
+    padding: 20px;
+    border-radius: 15px;
+    background: #fff3cd;
+    border-left: 6px solid #ffc107;
+    display: none;
+    align-items: flex-start;
+    gap: 15px;
+    animation: fadeIn 0.4s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.feedback-box.active {
+    display: flex;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.feedback-box .icon {
+    font-size: 2.5rem;
+}
+
+.feedback-content h3 {
+    margin-bottom: 5px;
+    color: #856404;
+    font-size: 1.3rem;
+    font-weight: 800;
+}
+
+.feedback-content p {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    color: #533f03;
+    font-weight: 600;
+}
+
+/* Popup chiến thắng */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.modal-content {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    max-width: 500px;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.modal-overlay.active .modal-content {
+    transform: scale(1);
+}
+
+.modal-icon {
+    font-size: 5rem;
+    margin-bottom: 20px;
+}
+
+.modal-content h2 {
+    font-size: 2.2rem;
+    color: var(--success);
+    margin-bottom: 15px;
+}
+
+.modal-content p {
+    font-size: 1.2rem;
+    color: var(--text);
+    margin-bottom: 25px;
+    line-height: 1.5;
+}
+
+.btn-close {
+    background: var(--success);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    border-radius: 30px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(120, 224, 143, 0.4);
+}
+
+.btn-close:hover {
+    background: #62cf78;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .test-row {
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-bottom: 15px;
+    }
+    
+    .test-row::-webkit-scrollbar {
+        height: 6px;
+    }
+    
+    .test-row::-webkit-scrollbar-thumb {
+        background-color: #cbd5e1;
+        border-radius: 4px;
+    }
+    
+    .main-content {
+        padding: 20px;
+    }
+}

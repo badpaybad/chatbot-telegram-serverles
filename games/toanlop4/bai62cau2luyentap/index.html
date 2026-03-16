@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toán Lớp 4 - Bài 62: Câu 2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <header>
+            <h1>Bài 62: Câu 2 - Luyện tập</h1>
+            <p class="instruction">Tìm phân số thích hợp vào chỗ trống.</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Phép tính a -->
+            <div class="test-row">
+                <div class="label">a)</div>
+                <div class="flow">
+                    <!-- Hình lục giác -->
+                    <div class="shape-wrap">
+                        <svg viewBox="0 0 100 100">
+                            <!-- Lục giác dẹt ngang -->
+                            <polygon class="svg-shape bg-blue" points="25,5 75,5 95,50 75,95 25,95 5,50"/>
+                        </svg>
+                        <div class="data-fraction">
+                            <span class="num">2</span>
+                            <span class="den">21</span>
+                        </div>
+                    </div>
+                    
+                    <div class="arrow-wrap">
+                        <div class="op">+ <div class="fraction inline"><span class="num">1</span><span class="den">7</span></div></div>
+                        <div class="arr">⟶</div>
+                    </div>
+                    
+                    <!-- Hình vuông bo góc -->
+                    <div class="shape-wrap interactive" id="wrap-a1">
+                        <svg viewBox="0 0 100 100">
+                            <rect class="svg-shape bg-white" x="5" y="5" width="90" height="90" rx="20"/>
+                        </svg>
+                        <div class="input-fraction">
+                            <input type="number" id="a1-num" placeholder="?">
+                            <hr>
+                            <input type="number" id="a1-den" placeholder="?">
+                        </div>
+                    </div>
+                    
+                    <div class="arrow-wrap">
+                        <div class="op">+ 1</div>
+                        <div class="arr">⟶</div>
+                    </div>
+                    
+                    <!-- Hình tròn -->
+                    <div class="shape-wrap interactive" id="wrap-a2">
+                        <svg viewBox="0 0 100 100">
+                            <circle class="svg-shape bg-white" cx="50" cy="50" r="45"/>
+                        </svg>
+                        <div class="input-fraction">
+                            <input type="number" id="a2-num" placeholder="?">
+                            <hr>
+                            <input type="number" id="a2-den" placeholder="?">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Phép tính b -->
+            <div class="test-row" style="margin-top: 20px;">
+                <div class="label">b)</div>
+                <div class="flow">
+                    <!-- Ngôi sao -->
+                    <div class="shape-wrap">
+                        <svg viewBox="0 0 100 100">
+                            <!-- Ngôi sao 5 cánh cân đối -->
+                            <polygon class="svg-shape bg-orange" points="50,5 64,35 97,35 70,55 80,87 50,68 20,87 30,55 3,35 36,35"/>
+                        </svg>
+                        <div class="data-fraction">
+                            <span class="num">9</span>
+                            <span class="den">25</span>
+                        </div>
+                    </div>
+                    
+                    <div class="arrow-wrap">
+                        <div class="op">+ <div class="fraction inline"><span class="num">1</span><span class="den">5</span></div></div>
+                        <div class="arr">⟶</div>
+                    </div>
+                    
+                    <!-- Hình vuông -->
+                    <div class="shape-wrap interactive" id="wrap-b1">
+                        <svg viewBox="0 0 100 100">
+                            <rect class="svg-shape bg-white" x="10" y="10" width="80" height="80"/>
+                        </svg>
+                        <div class="input-fraction">
+                            <input type="number" id="b1-num" placeholder="?">
+                            <hr>
+                            <input type="number" id="b1-den" placeholder="?">
+                        </div>
+                    </div>
+                    
+                    <div class="arrow-wrap">
+                        <div class="op">- <div class="fraction inline"><span class="num">1</span><span class="den">5</span></div></div>
+                        <div class="arr">⟶</div>
+                    </div>
+                    
+                    <!-- Hình tam giác -->
+                    <div class="shape-wrap interactive" id="wrap-b2">
+                        <svg viewBox="0 0 100 100">
+                            <polygon class="svg-shape bg-white" points="50,15 90,85 10,85"/>
+                        </svg>
+                        <!-- Top 60% is used because visually the triangle's center is lower -->
+                        <div class="input-fraction" style="top: 60%">
+                            <input type="number" id="b2-num" placeholder="?">
+                            <hr>
+                            <input type="number" id="b2-den" placeholder="?">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="actions">
+                <button class="btn-check" id="btn-check">Kiểm tra kết quả 🔍</button>
+            </div>
+            
+            <div class="feedback-box" id="feedback-box">
+                <div class="icon">💡</div>
+                <div class="feedback-content">
+                    <h3>Gợi ý cho em:</h3>
+                    <p id="feedback-text">...</p>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+    <!-- Modal chiến thắng -->
+    <div class="modal-overlay" id="success-modal">
+        <div class="modal-content">
+            <div class="modal-icon">🏆</div>
+            <h2>Tuyệt vời!</h2>
+            <p>Em đã hoàn thành xuất sắc bài tập tìm phân số thích hợp. Các phép tính cộng trừ phân số không làm khó được em!</p>
+            <button class="btn-close" onclick="closeModal()">Làm lại bài khác</button>
+        </div>
+    </div>
+
+    <!-- Thư viện tạo hiệu ứng pháo hoa -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

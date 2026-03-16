@@ -36,6 +36,7 @@ Khi được yêu cầu sử dụng `skill toan4` với một hình ảnh đầu
   - **Tuyệt đối không copy/hardcode** các value này vào các file khác để tránh nguy cơ bảo mật bị lộ mật khẩu.
   - Chạy script dùng chung `python skills/toan4/utils/deploy_game.py {tên tương đương với ảnh}` để đẩy folder game vừa tạo lên server thay vì sinh code mới.
   - Vị trí đường dẫn đích trên server: `/work/nginxstaticfile/games/maths/{tên tương đương với ảnh}`.
-
+  - Có thể dùng luôn folder venv mà không cần chạy sandbox
+  
 - [ ] **Task 7: Bàn giao**
   - Trả về thông báo thành công và cung cấp đường dẫn web trên server để người dùng bắt đầu trải nghiệm trò chơi: `https://static.airobotics.vn/games/maths/{tên tương đương với ảnh}/`
