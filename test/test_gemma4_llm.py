@@ -1,5 +1,6 @@
 import sys
 import os
+import time
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import unittest
 from gemma4.llm import generate_text
@@ -13,21 +14,25 @@ class TestGemma4LLM(unittest.TestCase):
     def test_generate_text_status(self):
         # Kiểm tra API trả về chuỗi thay vì rỗng hoặc lỗi
         # Lưu ý: Vì chạy trên CPU có thể chậm, ta chỉ kiểm tra cấu trúc cơ bản
+        start_time = time.time()
         query = "Xin chào, bạn là ai?"
         print(f"\n[*] Query: {query}")
         result = generate_text(query)
         print(f"[+] Result: {result}")
         self.assertIsInstance(result, str)
         self.assertTrue(len(result) > 0)
+        print(f"[!] Elapsed: {time.time() - start_time:.2f}s")
 
     def test_generate_text_content(self):
         # Kiểm tra nội dung cơ bản
+        start_time = time.time()
         query = "Hãy viết một câu chào ngắn bằng tiếng Việt"
         print(f"\n[*] Query: {query}")
         result = generate_text(query)
         print(f"[+] Result: {result}")
         self.assertIsInstance(result, str)
         self.assertTrue(len(result) > 0)
+        print(f"[!] Elapsed: {time.time() - start_time:.2f}s")
 
 if __name__ == "__main__":
     # Đảm bảo có config_dunp để import/cấu hình project (mặc định nếu thiếu)

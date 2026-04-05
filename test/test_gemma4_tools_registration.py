@@ -1,5 +1,6 @@
 import sys
 import os
+import time
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import unittest
 import json
@@ -15,6 +16,7 @@ class TestGemma4ToolsRegistration(unittest.TestCase):
 
     def test_add_tool_manual(self):
         # Đăng ký thủ công
+        start_time = time.time()
         tool_def = {
             "name": "test_tool",
             "description": "Mô tả tool test",
@@ -24,9 +26,11 @@ class TestGemma4ToolsRegistration(unittest.TestCase):
         self.gtool.add_tool(tool_def)
         print(f"[+] Tool list sau khi đăng ký: {len(self.gtool.tools)} cá thể.")
         self.assertIn(tool_def, self.gtool.tools)
+        print(f"[!] Elapsed: {time.time() - start_time:.2f}s")
 
     def test_add_tool_from_func(self):
         # Hàm mẫu có docstring và type hints
+        start_time = time.time()
         def calculate_bmi(weight: float, height: float):
             """
             Tính chỉ số khối cơ thể (BMI) từ cân nặng và chiều cao.
@@ -44,9 +48,11 @@ class TestGemma4ToolsRegistration(unittest.TestCase):
         self.assertIn("Tính chỉ số khối cơ thể", tool["description"])
         self.assertEqual(tool["parameters"]["weight"], "float")
         self.assertEqual(tool["parameters"]["height"], "float")
+        print(f"[!] Elapsed: {time.time() - start_time:.2f}s")
 
     def test_match_tools_with_registered(self):
         # Đăng ký hàm và test matching
+        start_time = time.time()
         def gui_tin_nhan(sdt: str, noi_dung: str):
             """
             Gửi tin nhắn SMS đến số điện thoại người nhận.
@@ -63,6 +69,7 @@ class TestGemma4ToolsRegistration(unittest.TestCase):
         
         self.assertIsInstance(results, list)
         self.assertTrue(len(results) > 0)
+        print(f"[!] Elapsed: {time.time() - start_time:.2f}s")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

@@ -1,5 +1,6 @@
 import sys
 import os
+import time
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import unittest
 import json
@@ -28,6 +29,7 @@ class TestGemma4Tools(unittest.TestCase):
 
     def test_match_tools_relevance(self):
         # Gửi lời nhắn liên quan đến email
+        start_time = time.time()
         query = "Gửi email cho abc@gmail.com nói rằng tôi sẽ đến muộn."
         print(f"\n[*] Query: {query}")
         results = match_tools(query, self.sample_tools)
@@ -41,9 +43,11 @@ class TestGemma4Tools(unittest.TestCase):
         best_match = results[0]
         self.assertIn("function_name", best_match)
         self.assertIn("score", best_match)
+        print(f"[!] Elapsed: {time.time() - start_time:.2f}s")
 
     def test_match_tools_empty_query(self):
         # Gửi query không liên quan
+        start_time = time.time()
         query = "Hôm nay tôi thấy vui quá."
         print(f"\n[*] Query: {query}")
         results = match_tools(query, self.sample_tools)
@@ -56,6 +60,7 @@ class TestGemma4Tools(unittest.TestCase):
             print(f"[*] Found {len(results)} potential matches (should be low score).")
         else:
             print("[*] No tools matched the irrelevant query (Expected behavior).")
+        print(f"[!] Elapsed: {time.time() - start_time:.2f}s")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

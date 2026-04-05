@@ -1,5 +1,6 @@
 import sys
 import os
+import time
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import unittest
 from gemma4.stt import transcribe_audio
@@ -12,36 +13,44 @@ class TestGemma4STT(unittest.TestCase):
     
     def test_transcribe_audio_not_found(self):
         # Kiểm tra trường hợp file không tồn tại
+        start_time = time.time()
         audio_path = "non_existent_file.wav"
         print(f"\n[*] Audio Path: {audio_path}")
         result = transcribe_audio(audio_path)
         print(f"[+] Result: {result}")
         self.assertIn("Lỗi", result)
         self.assertIn("không tồn tại", result)
+        print(f"[!] Elapsed: {time.time() - start_time:.2f}s")
 
     def test_transcribe_audio_empty_path(self):
         # Kiểm tra trường hợp path trống
+        start_time = time.time()
         audio_path = ""
         print(f"\n[*] Audio Path: {audio_path}")
         result = transcribe_audio(audio_path)
         print(f"[+] Result: {result}")
         self.assertIn("Lỗi", result)
+        print(f"[!] Elapsed: {time.time() - start_time:.2f}s")
 
     def test_transcribe_audio_path_wav(self):
         # Kiểm tra trường hợp nạp file audio thật
+        start_time = time.time()
         audio_path = "test/Quang-cao-thuoc.wav"
         print(f"\n[*] Audio Path: {audio_path}")
         result = transcribe_audio(audio_path)
         print(f"[+] Result: {result}")
         self.assertIn("công việc", result.lower())
+        print(f"[!] Elapsed: {time.time() - start_time:.2f}s")
 
     def test_transcribe_audio_path_mp3(self):
         # Kiểm tra trường hợp nạp file audio thật
+        start_time = time.time()
         audio_path = "test/Quang-cao-thuoc.mp3"
         print(f"\n[*] Audio Path: {audio_path}")
         result = transcribe_audio(audio_path)
         print(f"[+] Result: {result}")
         self.assertIn("công việc", result.lower())
+        print(f"[!] Elapsed: {time.time() - start_time:.2f}s")
 
 
 if __name__ == "__main__":
