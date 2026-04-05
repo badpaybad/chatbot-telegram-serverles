@@ -14,3 +14,9 @@ tổng hợp code ở folder gemma4 thành 1 file tailieu.md
 **cập nhật 2**
 
 bổ xung embedding image dùng gemma4
+
+**cập nhật 3**
+dùng gemma4 để 
+    - bổ xung hàm lấy mô tả tử ảnh đưa vào
+    - bổ xung thêm việc đọc các file (pdf, xlsx, txt, csv, docx, pptx, ...) có kèm đưa prompt vào để thao tác file 
+    - bổ xung thêm hàm thao tác với file ảnh (jpeg, png , bitmap ...) có kèm đưa prompt vào để thao thác file 
