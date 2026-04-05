@@ -7,6 +7,7 @@ Bao gồm:
 - Embedding (Vector) sử dụng Gemma 4 cho cả Text và Image.
 - Vision Analysis: Mô tả ảnh và VQA.
 - File Analysis: Đọc và phân tích PDF, DOCX, PPTX, XLSX, CSV, TXT.
+- TTS (Text to Speech): Chuyển văn bản thành giọng nói tiếng Việt bằng Kokoro-ONNX.
 """
 
 from .stt import transcribe_audio
@@ -16,6 +17,7 @@ from .tools import match_tools, Gemma4Tools
 from .embeddings import get_text_embedding, get_image_embedding
 from .vision import describe_image, query_image
 from .files import process_file_with_prompt, read_file_content
+from .tts import save_tts, Gemma4TTS
 
 __all__ = [
     "transcribe_audio",
@@ -29,5 +31,7 @@ __all__ = [
     "describe_image",
     "query_image",
     "process_file_with_prompt",
-    "read_file_content"
+    "read_file_content",
+    "save_tts",
+    "Gemma4TTS"
 ]
