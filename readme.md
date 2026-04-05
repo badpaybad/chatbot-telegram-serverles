@@ -124,6 +124,8 @@ All above run
 
 ### Nếu bạn là devleroper nên dùng: https://github.com/ggml-org/llama.cpp 
 
+### gemma4 sẵn sàng trong folder gemma4
+
               
 # 6. my_telethon.py
 
