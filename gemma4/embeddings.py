@@ -15,6 +15,13 @@ def get_text_embedding(text: str, model_id: str = "google/gemma-4-e4b-it") -> li
     manager = get_manager(model_id)
     return manager.get_embeddings(text)
 
+def get_image_embedding(image_path: str, model_id: str = "google/gemma-4-e4b-it") -> list:
+    """
+    Hàm wrapper để lấy embedding của hình ảnh.
+    """
+    manager = get_manager(model_id)
+    return manager.get_image_embeddings(image_path)
+
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         text = " ".join(sys.argv[1:])

@@ -19,7 +19,8 @@ from gemma4 import (
     generate_text, 
     transcribe_audio, 
     match_tools, 
-    get_text_embedding
+    get_text_embedding,
+    get_image_embedding
 )
 
 class TestGemma4Features(unittest.TestCase):
@@ -28,6 +29,7 @@ class TestGemma4Features(unittest.TestCase):
         print("\n[*] Đang khởi tạo Gemma4Manager cho bộ test...")
         cls.manager = Gemma4Manager()
         cls.audio_file = os.path.join(project_root, "voice_assistant", "giong_cua_toi.wav")
+        cls.image_file = os.path.join(project_root, "img1.png")
 
     def test_text_generation(self):
         print("\n[*] Đang test Text Generation...")
@@ -43,13 +45,25 @@ class TestGemma4Features(unittest.TestCase):
         self.assertTrue(found, "Response should be in Vietnamese")
 
     def test_embeddings(self):
-        print("\n[*] Đang test Embeddings...")
+        print("\n[*] Đang test Text Embeddings...")
         text = "Học máy là một lĩnh vực của trí tuệ nhân tạo."
         embedding = get_text_embedding(text)
         print(f"Text: {text}")
         print(f"Embedding size: {len(embedding)}")
         self.assertIsInstance(embedding, list)
-        self.assertEqual(len(embedding), 2560) # Theo config.json: hidden_size = 2560
+        self.assertEqual(len(embedding), 2560)
+
+    def test_image_embeddings(self):
+        print("\n[*] Đang test Image Embeddings...")
+        if os.path.exists(self.image_file):
+            embedding = get_image_embedding(self.image_file)
+            print(f"Image: {self.image_file}")
+            print(f"Embedding size: {len(embedding)}")
+            self.assertIsInstance(embedding, list)
+            # Projected vision dimension: 2560 (aligned with text)
+            self.assertEqual(len(embedding), 2560)
+        else:
+            print(f"[!] Bỏ qua test Image Embedding vì không tìm thấy file: {self.image_file}")
 
     def test_tool_calling(self):
         print("\n[*] Đang test Tool Calling...")

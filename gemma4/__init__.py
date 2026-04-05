@@ -11,7 +11,7 @@ from .stt import transcribe_audio
 from .llm import generate_text
 from .manager import get_manager, Gemma4Manager
 from .tools import match_tools, Gemma4Tools
-from .embeddings import get_text_embedding
+from .embeddings import get_text_embedding, get_image_embedding
 
 __all__ = [
     "transcribe_audio",
@@ -20,5 +20,6 @@ __all__ = [
     "Gemma4Manager",
     "match_tools",
     "Gemma4Tools",
-    "get_text_embedding"
+    "get_text_embedding",
+    "get_image_embedding"
 ]

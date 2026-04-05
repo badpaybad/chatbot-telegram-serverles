@@ -10,3 +10,7 @@ code dùng huggingface không dùng ollama hay các wrapper khác , cần tạo 
 bổ xung embedding text dùng gemma4
 
 tổng hợp code ở folder gemma4 thành 1 file tailieu.md
+
+**cập nhật 2**
+
+bổ xung embedding image dùng gemma4

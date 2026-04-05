@@ -2,6 +2,7 @@ import os
 import torch
 import sys
 import threading
+from PIL import Image
 from transformers import AutoProcessor, AutoModelForMultimodalLM, AutoConfig
 
 # Import config based on project structure
@@ -166,6 +167,70 @@ class Gemma4Manager:
                 embeddings = torch.mean(last_hidden_state, dim=1)
             
             return embeddings[0].cpu().tolist()
+
+    def get_image_embeddings(self, image_path: str) -> list:
+        """
+        Tạo vector embedding từ hình ảnh sử dụng Gemma 4 (Vision Tower).
+        Sử dụng mean pooling từ các token hình ảnh sau khi qua Vision Tower.
+        """
+        if not hasattr(self, 'model') or self.model is None:
+            raise RuntimeError("Lỗi: Hệ thống AI chưa sẵn sàng.")
+
+        if not os.path.exists(image_path):
+            raise FileNotFoundError(f"Lỗi: File ảnh {image_path} không tồn tại.")
+
+        try:
+            # Load và chuẩn bị ảnh
+            image = Image.open(image_path).convert("RGB")
+            
+            # Sử dụng processor để xử lý ảnh
+            # Đối với Gemma 4, cung cấp text="" để tránh lỗi NoneType trong processor.
+            inputs = self.processor(text="", images=image, return_tensors="pt").to(self.device)
+            
+            with torch.no_grad():
+                # Đường dẫn chính xác cho kiến trúc Gemma4: self.model.model.vision_tower
+                if hasattr(self.model, "model") and hasattr(self.model.model, "vision_tower"):
+                    # Gemma 4 processor trả về "image_position_ids" thay vì "pixel_position_ids"
+                    pixel_values = inputs.get("pixel_values")
+                    pixel_position_ids = inputs.get("image_position_ids")
+                    if pixel_position_ids is None:
+                        pixel_position_ids = inputs.get("pixel_position_ids")
+                    
+                    if pixel_values is None or pixel_position_ids is None:
+                        raise RuntimeError("Thiếu pixel_values hoặc position_ids trong processor output.")
+
+                    vision_outputs = self.model.model.vision_tower(
+                        pixel_values=pixel_values, 
+                        pixel_position_ids=pixel_position_ids
+                    )
+                    # vision_outputs là BaseModelOutput, lấy last_hidden_state [1, tokens, 768]
+                    image_features = vision_outputs.last_hidden_state
+                    
+                    # Nếu có lớp chiếu (multimodal projector) để sang không gian 2560
+                    if hasattr(self.model.model, "embed_vision"):
+                        image_features = self.model.model.embed_vision(image_features)
+                elif hasattr(self.model, "get_image_features"):
+                    image_features = self.model.get_image_features(**inputs)
+                else:
+                    # Fallback cuối cùng
+                    outputs = self.model(**inputs, output_hidden_states=True)
+                    if hasattr(outputs, "hidden_states") and outputs.hidden_states:
+                        image_features = outputs.hidden_states[0]
+                    else:
+                        raise RuntimeError("Không thể trích xuất đặc trưng hình ảnh từ mô hình này.")
+
+                # Mean pooling qua các token hình ảnh
+                # image_features có thể là [batch, tokens, hidden] hoặc [tokens, hidden]
+                if image_features.dim() == 3:
+                    embeddings = torch.mean(image_features, dim=1)[0]
+                elif image_features.dim() == 2:
+                    embeddings = torch.mean(image_features, dim=0)
+                else:
+                    embeddings = image_features.flatten()
+
+                return embeddings.cpu().tolist()
+        except Exception as e:
+            raise RuntimeError(f"Lỗi khi trích xuất embedding ảnh: {str(e)}")
 
 def get_manager(model_id: str = "google/gemma-4-e4b-it"):
     """Helper function for singleton access."""
