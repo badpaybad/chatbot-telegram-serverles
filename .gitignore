@@ -84,3 +84,5 @@ skills/browser/playwright_metadata.pkl
 **/breakingnews/**.csv
 **/zalo_qr.png
 games/toanlop4/config.md
+**/client_secret_*.json
+gemma4/model/
