@@ -1,47 +1,51 @@
-# Tài liệu và Tổng hợp Code Gemma 4 (Cập nhật 4)
+# Tài liệu và Tổng hợp Code Gemma 4 (Cập nhật 5)
 
-File này tổng hợp toàn bộ mã nguồn của module `gemma4`, bao gồm STT, LLM, Tool Call, Embedding, Vision, File Processing và **TTS (Text-to-Speech)**.
+File này tổng hợp toàn bộ mã nguồn của module `gemma4`, bao gồm STT, LLM, Tool Call, Embedding, Vision, File Processing và TTS.
 
 ## 1. Cấu trúc thư mục
 ```
 gemma4/
 ├── __init__.py      # Khởi tạo package và export API
-├── manager.py       # Quản lý Singleton Model & Processor
+├── manager.py       # Quản lý Singleton Model & Processor (Tự động tải model)
 ├── llm.py           # Text Generation
 ├── stt.py           # Speech to Text
 ├── tools.py         # Tool Call Scoring
 ├── embeddings.py    # Text/Image Embedding
 ├── vision.py        # Phân tích hình ảnh
 ├── files.py         # Xử lý file đa định dạng
-├── tts.py           # CHUYỂN VĂN BẢN THÀNH GIỌNG NÓI (KOKORO-ONNX) [NEW]
-├── download_kokoro.py # Tải model và voice cho TTS [NEW]
+├── tts.py           # Chuyển văn bản thành giọng nói (Kokoro-ONNX)
+├── download_model.py # Script hỗ trợ tải model thủ công [NEW/UPDATED]
 └── requirements.md  # Yêu cầu hệ thống
 ```
 
 ---
 
-## 2. Các chức năng mới (Cập nhật 4)
+## 2. Các chức năng tự động (Cập nhật 5)
 
-### 2.1. Text-to-Speech tiếng Việt (`gemma4/tts.py`)
-Sử dụng Kokoro-ONNX để chuyển đổi văn bản tiếng Việt thành file âm thanh chất lượng cao.
+### 2.1. Tự động kiểm tra và tải Model
+Module `gemma4` hiện đã hỗ trợ tự động kiểm tra sự tồn tại của các model cần thiết khi khởi tạo `Gemma4Manager`.
+
+- **Gemma 4**: Kiểm tra tại HF Cache hoặc thư mục `gemma4/model/`. Nếu thiếu, sẽ tự động tải từ `google/gemma-4-e4b-it`.
+- **Kokoro ONNX**: Kiểm tra tại `gemma4/model/kokoro/`. Nếu thiếu, sẽ tự động tải model và voices.
+
+### 2.2. Text-to-Speech tiếng Việt (`gemma4/tts.py`)
+Sử dụng Kokoro-ONNX để chuyển đổi văn bản tiếng Việt thành file âm thanh.
 
 ```python
 from gemma4.tts import save_tts
 
-# Chuyển văn bản thành giọng nói và lưu vào file output.wav
-output_file = save_tts("Chào bạn, tôi có thể giúp gì cho bạn?", "hello.wav")
-print(f"File âm thanh đã được lưu tại: {output_file}")
+# Hệ thống sẽ tự động tải model nếu bạn chưa chạy script download!
+output_file = save_tts("Chào bạn, tôi là trợ lý AI.", "hello.wav")
 ```
 
 ---
 
-## 3. Cài đặt và chuẩn bị Assets
+## 3. Cài đặt thủ công (Tùy chọn)
 
-Trước khi sử dụng TTS, cần chạy script tải model:
+Nếu bạn muốn chuẩn bị assets trước khi chạy ứng dụng chính:
 ```bash
-python gemma4/download_kokoro.py
+python gemma4/download_model.py
 ```
-Model mặc định sẽ được lưu tại `gemma4/model/kokoro/`.
 
 ---
 

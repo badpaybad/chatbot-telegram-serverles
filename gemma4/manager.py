@@ -10,6 +10,7 @@ project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if project_root not in sys.path:
     sys.path.append(project_root)
 from config import *
+from .download_model import setup_gemma, setup_kokoro
 
 class Gemma4Manager:
     """
@@ -21,25 +22,39 @@ class Gemma4Manager:
     _lock = threading.Lock()
 
     def __new__(cls, model_id: str = "google/gemma-4-e4b-it"):
-        # /home/dunp/.cache/huggingface/hub/models--google--gemma-4-e4b-it cần load từ folder này trước, nếu ko đươc thì mới download
         if cls._instance is None:
             with cls._lock:
                 if cls._instance is None:
-                    # 1. Check HF Cache (Prio Offline)
-                    cache_base = "/home/dunp/.cache/huggingface/hub/models--google--gemma-4-e4b-it/snapshots"
-                    if os.path.exists(cache_base):
-                        subfolders = [f for f in os.listdir(cache_base) if os.path.isdir(os.path.join(cache_base, f))]
-                        if subfolders:
-                            # Use the last one (often the most recent or only one)
-                            model_id = os.path.join(cache_base, subfolders[-1])
-                            print(f"[*] Found HF cache snapshot: {model_id}")
+                    # Resolve priority path: 1. Local project, 2. HF cache, 3. Automated Setup
+                    model_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "model")
+                    local_model_dir = os.path.join(model_root, "gemma-4-e4b-it")
+                    # cache_base = "/home/dunp/.cache/huggingface/hub/models--google--gemma-4-e4b-it/snapshots"
+                    
+                    # 1. Prioritize Local Project Folder (as requested)
+                    if os.path.isdir(local_model_dir) and os.path.exists(os.path.join(local_model_dir, "config.json")):
+                         print(f"[*] Using local project Gemma 4 model: {local_model_dir}")
+                         model_id = local_model_dir
+                    
+                    # # 2. Check HF Cache (Prio Offline) if local not found
+                    # elif os.path.exists(cache_base):
+                    #     subfolders = sorted([f for f in os.listdir(cache_base) if os.path.isdir(os.path.join(cache_base, f))])
+                    #     if subfolders:
+                    #         # Use the last one (often the most recent or only one)
+                    #         model_id = os.path.join(cache_base, subfolders[-1])
+                    #         print(f"[*] Found HF cache snapshot: {model_id}")
 
-                    # 2. Check Local Project Folder (fallback) 
-                    if not os.path.isabs(model_id) or not os.path.exists(model_id):
-                        local_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "model")
-                        if os.path.isdir(local_path) and os.listdir(local_path):
-                             print(f"[*] Local project Gemma 4 model found: {local_path}")
-                             model_id = local_path
+                    # 3. Trigger setup if absolutely nothing found
+                    if not os.path.exists(os.path.join(local_model_dir, "config.json")) and (not os.path.isabs(model_id) or not os.path.exists(model_id)):
+                        print("[*] Gemma 4 model not found locally or in cache. Triggering automated setup...")
+                        setup_gemma()
+                        if os.path.exists(os.path.join(local_model_dir, "config.json")):
+                             model_id = local_model_dir
+                    
+                    # Also ensure Kokoro is ready if needed, though tts.py might use it
+                    kokoro_model_path = os.path.join(model_root, "kokoro", "kokoro-v1.0.onnx")
+                    if not os.path.exists(kokoro_model_path):
+                        print("[*] Kokoro ONNX assets not found. Triggering automated setup...")
+                        setup_kokoro()
                     
                     print(f"[*] Initializing Gemma4Manager for {model_id}...")
                     

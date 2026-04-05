@@ -24,3 +24,10 @@ dùng gemma4 để
 **cập nhật 4**
 
 bổ xung dùng kokoro_onnx để text to speech cho tiếng Việt
+
+**cập nhật 5**
+
+sửa code gemma4/download_model.py để kiểm tra nếu chưa có thì 
+
+    download model kokoro_onnx vào folder gemma4/model/kokoro
+    download model google/gemma-4-e4b-it vào folder gemma4/model/gemma-4-e4b-it

@@ -3,7 +3,12 @@ import numpy as np
 import soundfile as sf
 from kokoro_onnx import Kokoro
 from gemma4.manager import project_root
-
+# echo "📥 Downloading Kokoro models..." && \
+#     curl -L --progress-bar -o kokoro-v1.0.int8.onnx \
+#     https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.int8.onnx && \
+#     curl -L --progress-bar -o voices-v1.0.bin \
+#     https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin && \
+#     echo "✅ Models downloaded successfully"
 class Gemma4TTS:
     def __init__(self, model_id: str = "kokoro-v1.0"):
         self.base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -15,10 +20,10 @@ class Gemma4TTS:
         
         self.kokoro = Kokoro(self.model_path, self.voices_path)
 
-    def text_to_speech(self, text: str, output_path: str, voice: str = "af_sarah", speed: float = 1.0):
+    def text_to_speech(self, text: str, output_path: str, voice: str = "af_sky", speed: float = 1.0):
         """
         Chuyển đổi văn bản sang giọng nói và lưu thành file wav.
-        Mặc định sử dụng 'af_sarah' kết hợp với espeak-ng tiếng Việt (vi).
+        Mặc định sử dụng 'af_sky' kết hợp với espeak-ng tiếng Việt (vi).
         """
         try:
             # Kokoro-onnx tự động sử dụng espeak-ng nếu được cài đặt.
