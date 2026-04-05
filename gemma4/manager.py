@@ -1,6 +1,7 @@
 import os
 import torch
 import sys
+import threading
 from transformers import AutoProcessor, AutoModelForMultimodalLM, AutoConfig
 
 # Import config based on project structure
@@ -13,20 +14,39 @@ class Gemma4Manager:
     """
     Singleton Manager for loading the multimodal Gemma 4 model and processor once.
     Optimized for 16GB RAM constraints using low_cpu_mem_usage.
+    Thread-safe implementation using Double-checked locking.
     """
     _instance = None
+    _lock = threading.Lock()
 
     def __new__(cls, model_id: str = "google/gemma-4-e4b-it"):
+        # /home/dunp/.cache/huggingface/hub/models--google--gemma-4-e4b-it cần load từ folder này trước, nếu ko đươc thì mới download
         if cls._instance is None:
-            # Check for local storage presence in gemma4 subfolder 
-            local_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "model")
-            if os.path.isdir(local_path) and os.listdir(local_path):
-                 print(f"[*] Local Gemma 4 model found: {local_path}")
-                 model_id = local_path
-            
-            print(f"[*] Initializing Gemma4Manager for {model_id}...")
-            cls._instance = super(Gemma4Manager, cls).__new__(cls)
-            cls._instance._load_model(model_id)
+            with cls._lock:
+                if cls._instance is None:
+                    # 1. Check HF Cache (Prio Offline)
+                    cache_base = "/home/dunp/.cache/huggingface/hub/models--google--gemma-4-e4b-it/snapshots"
+                    if os.path.exists(cache_base):
+                        subfolders = [f for f in os.listdir(cache_base) if os.path.isdir(os.path.join(cache_base, f))]
+                        if subfolders:
+                            # Use the last one (often the most recent or only one)
+                            model_id = os.path.join(cache_base, subfolders[-1])
+                            print(f"[*] Found HF cache snapshot: {model_id}")
+
+                    # 2. Check Local Project Folder (fallback) 
+                    if not os.path.isabs(model_id) or not os.path.exists(model_id):
+                        local_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "model")
+                        if os.path.isdir(local_path) and os.listdir(local_path):
+                             print(f"[*] Local project Gemma 4 model found: {local_path}")
+                             model_id = local_path
+                    
+                    print(f"[*] Initializing Gemma4Manager for {model_id}...")
+                    
+                    # Create the actual instance
+                    new_instance = super(Gemma4Manager, cls).__new__(cls)
+                    # Load model BEFORE assigning to _instance to prevent race condition
+                    new_instance._load_model(model_id)
+                    cls._instance = new_instance
         return cls._instance
 
     def _load_model(self, model_id: str):
