@@ -92,7 +92,7 @@ class Gemma4Manager:
         text_prompt = self.processor.apply_chat_template(messages, add_generation_prompt=True, tokenize=False)
         
         if audio_array is not None:
-            inputs = self.processor(text=text_prompt, audios=audio_array, sampling_rate=sampling_rate, return_tensors="pt").to(self.device)
+            inputs = self.processor(text=text_prompt, audio=audio_array, sampling_rate=sampling_rate, return_tensors="pt").to(self.device)
         else:
             inputs = self.processor(text=text_prompt, return_tensors="pt").to(self.device)
 

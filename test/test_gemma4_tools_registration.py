@@ -20,7 +20,9 @@ class TestGemma4ToolsRegistration(unittest.TestCase):
             "description": "Mô tả tool test",
             "parameters": {"param1": "string"}
         }
+        print(f"\n[*] Đăng ký tool thủ công: {tool_def['name']}")
         self.gtool.add_tool(tool_def)
+        print(f"[+] Tool list sau khi đăng ký: {len(self.gtool.tools)} cá thể.")
         self.assertIn(tool_def, self.gtool.tools)
 
     def test_add_tool_from_func(self):
@@ -31,10 +33,12 @@ class TestGemma4ToolsRegistration(unittest.TestCase):
             """
             return weight / (height ** 2)
 
+        print(f"\n[*] Đăng ký tool từ hàm: {calculate_bmi.__name__}")
         self.gtool.add_tool_from_func(calculate_bmi)
         
         # Tìm tool vừa đăng ký
         tool = next((t for t in self.gtool.tools if t["name"] == "calculate_bmi"), None)
+        print(f"[+] Tool trích xuất metadata: {json.dumps(tool, indent=2, ensure_ascii=False)}")
         self.assertIsNotNone(tool)
         self.assertEqual(tool["name"], "calculate_bmi")
         self.assertIn("Tính chỉ số khối cơ thể", tool["description"])

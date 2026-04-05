@@ -12,14 +12,37 @@ class TestGemma4STT(unittest.TestCase):
     
     def test_transcribe_audio_not_found(self):
         # Kiểm tra trường hợp file không tồn tại
-        result = transcribe_audio("non_existent_file.wav")
+        audio_path = "non_existent_file.wav"
+        print(f"\n[*] Audio Path: {audio_path}")
+        result = transcribe_audio(audio_path)
+        print(f"[+] Result: {result}")
         self.assertIn("Lỗi", result)
         self.assertIn("không tồn tại", result)
 
     def test_transcribe_audio_empty_path(self):
         # Kiểm tra trường hợp path trống
-        result = transcribe_audio("")
+        audio_path = ""
+        print(f"\n[*] Audio Path: {audio_path}")
+        result = transcribe_audio(audio_path)
+        print(f"[+] Result: {result}")
         self.assertIn("Lỗi", result)
+
+    def test_transcribe_audio_path_wav(self):
+        # Kiểm tra trường hợp nạp file audio thật
+        audio_path = "test/Quang-cao-thuoc.wav"
+        print(f"\n[*] Audio Path: {audio_path}")
+        result = transcribe_audio(audio_path)
+        print(f"[+] Result: {result}")
+        self.assertIn("công việc", result.lower())
+
+    def test_transcribe_audio_path_mp3(self):
+        # Kiểm tra trường hợp nạp file audio thật
+        audio_path = "test/Quang-cao-thuoc.mp3"
+        print(f"\n[*] Audio Path: {audio_path}")
+        result = transcribe_audio(audio_path)
+        print(f"[+] Result: {result}")
+        self.assertIn("công việc", result.lower())
+
 
 if __name__ == "__main__":
     # Tự động gán config_dunp nếu thiếu
