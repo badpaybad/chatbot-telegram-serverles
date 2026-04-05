@@ -129,6 +129,44 @@ class Gemma4Manager:
         response = self.processor.decode(outputs[0][inputs['input_ids'].shape[1]:], skip_special_tokens=True)
         return response.strip()
 
+    def get_embeddings(self, text: str) -> list:
+        """
+        Tạo vector embedding từ văn bản đầu vào sử dụng Gemma 4 (Text Tower).
+        Sử dụng mean pooling từ last_hidden_state.
+        """
+        if not hasattr(self, 'model') or self.model is None:
+            raise RuntimeError("Lỗi: Hệ thống AI chưa sẵn sàng.")
+
+        # Chuẩn bị input cho text
+        inputs = self.processor(text=text, return_tensors="pt").to(self.device)
+        
+        with torch.no_grad():
+            # Yêu cầu trả về hidden states
+            outputs = self.model(**inputs, output_hidden_states=True)
+            
+            # Lấy last_hidden_state từ language_model hoặc từ output chính
+            # Đối với Gemma4ForConditionalGeneration, last_hidden_state thường ở outputs.hidden_states[-1]
+            # của phần language_model nếu nó là wrapper, hoặc trực tiếp nếu là decoder-only.
+            
+            if hasattr(outputs, 'hidden_states') and outputs.hidden_states is not None:
+                last_hidden_state = outputs.hidden_states[-1]
+            else:
+                # Fallback nếu model trả về trực tiếp (tùy thuộc vào implementation của Gemma4)
+                last_hidden_state = outputs[0]
+
+            # Mean pooling qua chiều sequence (dim=1)
+            # last_hidden_state shape: [batch, seq_len, hidden_size]
+            attention_mask = inputs.get('attention_mask')
+            if attention_mask is not None:
+                input_mask_expanded = attention_mask.unsqueeze(-1).expand(last_hidden_state.size()).float()
+                sum_embeddings = torch.sum(last_hidden_state * input_mask_expanded, 1)
+                sum_mask = torch.clamp(input_mask_expanded.sum(1), min=1e-9)
+                embeddings = sum_embeddings / sum_mask
+            else:
+                embeddings = torch.mean(last_hidden_state, dim=1)
+            
+            return embeddings[0].cpu().tolist()
+
 def get_manager(model_id: str = "google/gemma-4-e4b-it"):
     """Helper function for singleton access."""
     return Gemma4Manager(model_id)

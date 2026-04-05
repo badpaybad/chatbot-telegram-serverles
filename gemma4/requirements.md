@@ -5,3 +5,8 @@ code dùng huggingface không dùng ollama hay các wrapper khác , cần tạo 
 - hàm dùng như tool call, định nghĩa các tên hàm đầu vào của hàm và trả về kết quả là các hàm có thể được dùng với score để đánh giá mức độ phù hợp của kết quả với yêu cầu
 
 **bắt buộc** toàn bộ đầu trả ra của LLM cần là tiếng việt, tất cả đều dùng model google/gemma-4-e4b-it, kiểm tra nếu hỗ trợ gpu thì dùng gpu không thì dùng cpu
+
+**cập nhật 1**
+bổ xung embedding text dùng gemma4
+
+tổng hợp code ở folder gemma4 thành 1 file tailieu.md
