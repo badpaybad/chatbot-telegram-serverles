@@ -124,6 +124,8 @@ All above run
 
 ### Nếu bạn là devleroper nên dùng: https://github.com/ggml-org/llama.cpp 
 
+### gemma4 sẵn sàng trong folder gemma4
+
               
 # 6. my_telethon.py
 
@@ -157,7 +159,7 @@ Là folder chứa các skill, mỗi skill là một folder chứa các file sau:
 
 # orchestrationcontext.py
 
-Orchestration: Nghệ thuật tạo prompt động từ các file trong folder skills/ đọc file readme.md của từng skill có thể ghép nối các skill lại với nhau để tạo ra một skill mới, ghép nối các short term memory, long term memory để ra system prompt ... động giải quyết context chat 
+Orchestration: Nghệ thuật tạo prompt động từ các file trong folder skills/ đọc file readme.md của từng skill có thể ghép nối các skill lại với nhau để tạo ra một skill mới, ghép nối các short term memory, long term memory để ra system prompt ... tự động giải quyết context chat 
 
 Là file chứa logic để điều phối các skill, mỗi skill là một folder chứa các file sau:
 
