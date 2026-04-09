@@ -31,3 +31,9 @@ sửa code gemma4/download_model.py để kiểm tra nếu chưa có thì
 
     download model kokoro_onnx vào folder gemma4/model/kokoro
     download model google/gemma-4-e4b-it vào folder gemma4/model/gemma-4-e4b-it
+
+
+**cập nhật 6**
+
+sửa code gemma4/manager.py chạy gemma4 với 4-bit (chọn mức **NF4** để tối ưu cho CPU AMD hỗ trợ AVX2/AVX-512).
+Quantization: Sử dụng **NF4** thay vì Q4_0 hoặc Q4_K_M vì trong môi trường Transformers + BitsAndBytes hiện tại trên CPU, NF4 là định dạng 4-bit duy nhất được hỗ trợ chính thức và tối ưu hóa tốt nhất cho phần cứng AMD (cho độ chính xác cao hơn uniform quantization và tương thích 100% với tập lệnh AVX2/AVX-512).

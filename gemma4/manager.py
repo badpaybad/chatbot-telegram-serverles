@@ -3,7 +3,7 @@ import torch
 import sys
 import threading
 from PIL import Image
-from transformers import AutoProcessor, AutoModelForMultimodalLM, AutoConfig
+from transformers import AutoProcessor, AutoModelForMultimodalLM, AutoConfig, BitsAndBytesConfig
 
 # Import config based on project structure
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -92,12 +92,22 @@ class Gemma4Manager:
             
             # Load model with memory-efficient settings
             # low_cpu_mem_usage=True: Only load weights when needed, reduces peak RAM
-            print(f"[*] Instantiating model with low_cpu_mem_usage=True...")
+            print(f"[*] Instantiating model with 4-bit (NF4) quantization...")
+            
+            # Configure 4-bit quantization (NF4)
+            # NF4 is the standard and optimized 4-bit quantization for bitsandbytes on CPU.
+            quantization_config = BitsAndBytesConfig(
+                load_in_4bit=True,
+                bnb_4bit_compute_dtype=torch.float32 if self.device == "cpu" else torch.bfloat16,
+                bnb_4bit_quant_type="nf4",
+                bnb_4bit_use_double_quant=True
+            )
+
             self.model = AutoModelForMultimodalLM.from_pretrained(
                 self.model_id,
                 config=config,
                 device_map=self.device,
-                torch_dtype=self.dtype,
+                quantization_config=quantization_config,
                 trust_remote_code=True,
                 low_cpu_mem_usage=True
             ).eval() 
