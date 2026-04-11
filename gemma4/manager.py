@@ -2,6 +2,8 @@ import os
 import torch
 import sys
 import threading
+import numpy as np
+from typing import List, Dict, Optional, Any, Union
 from PIL import Image
 from transformers import AutoProcessor, AutoModelForMultimodalLM, AutoConfig, BitsAndBytesConfig
 
@@ -118,40 +120,57 @@ class Gemma4Manager:
             # Raise so the app knows it failed to initialize AI
             raise e
 
-    def generate(self, user_input: str, audio_array=None, image_path=None, max_tokens: int = 512, sampling_rate: int = 16000) -> str:
+    def generate(self, input_data: any, audio_array=None, image_path=None, images_list: List[Image.Image] = None, audio_list: List[np.ndarray] = None, max_tokens: int = 512, sampling_rate: int = 16000) -> str:
         """
-        Processes text and optional audio/image input to generate a response in Vietnamese.
+        Processes chat history (list of messages) or single text prompt with optional audio/image.
+        input_data: str (prompt) or list (messages history)
+        images_list: List of PIL Image objects
+        audio_list: List of numpy arrays
         """
         if not hasattr(self, 'model') or self.model is None:
              return "Lỗi: Hệ thống AI chưa sẵn sàng."
 
-        # Build multimodal prompt
-        messages = [{"role": "user", "content": []}]
-        
-        if image_path is not None and os.path.exists(image_path):
-            messages[0]["content"].append({"type": "image"})
-        
-        if audio_array is not None:
-            messages[0]["content"].append({"type": "audio"})
-        
-        # Enforce Vietnamese constraints
-        messages[0]["content"].append({"type": "text", "text": f"{user_input}\n\nNote: Always answer in Vietnamese, naturally and concisely."})
+        messages = []
+        if isinstance(input_data, list):
+            messages = input_data
+        else:
+            user_input = str(input_data)
+            msg_content = []
+            
+            # backward compatibility for single file/array
+            if (image_path is not None and os.path.exists(image_path)) or (images_list and len(images_list) > 0):
+                msg_content.append({"type": "image"})
+            
+            if audio_array is not None or (audio_list and len(audio_list) > 0):
+                msg_content.append({"type": "audio"})
+            
+            msg_content.append({"type": "text", "text": f"{user_input}\n\nNote: Always answer in Vietnamese, naturally and concisely."})
+            messages = [{"role": "user", "content": msg_content}]
 
         # Apply chat template
         text_prompt = self.processor.apply_chat_template(messages, add_generation_prompt=True, tokenize=False)
         
-        # Prepare inputs based on available modalities
-        images = None
+        # Prepare multimodal inputs
+        final_images = []
+        if images_list:
+            final_images.extend(images_list)
+        
         if image_path is not None and os.path.exists(image_path):
             try:
-                images = Image.open(image_path).convert("RGB")
+                final_images.append(Image.open(image_path).convert("RGB"))
             except Exception as e:
                 print(f"[-] Warning: Failed to load image {image_path}: {e}")
+        
+        final_audio = None
+        if audio_list and len(audio_list) > 0:
+            final_audio = audio_list[0] # Gemma 4 current processor usually takes one audio array
+        elif audio_array is not None:
+            final_audio = audio_array
 
         inputs = self.processor(
             text=text_prompt, 
-            images=images, 
-            audio=audio_array, 
+            images=final_images if final_images else None, 
+            audio=final_audio, 
             sampling_rate=sampling_rate, 
             return_tensors="pt"
         ).to(self.device)
@@ -166,7 +185,8 @@ class Gemma4Manager:
             )
             
         # Decode and strip prompt
-        response = self.processor.decode(outputs[0][inputs['input_ids'].shape[1]:], skip_special_tokens=True)
+        input_len = inputs['input_ids'].shape[1]
+        response = self.processor.decode(outputs[0][input_len:], skip_special_tokens=True)
         return response.strip()
 
     def generate_with_image(self, image_path: str, prompt: str, max_tokens: int = 512) -> str:
