@@ -187,3 +187,40 @@ các tên db và bảng dùng sqllite chung cho cả project, có query json , d
 - LLM phân biệt nhờ chat_id 
 - LLM có thể là gemini hoặc ollama local
 - LLM có tool call hoặc function call để gọi các skill
+
+
+# gemma4 run locally compatible with gemini api real
+
+curl -X 'POST' \
+  'http://0.0.0.0:8000/v1beta/models/gemma-4-e4b-it:generateContent' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "contents": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "string"
+        }
+      ]
+    }
+  ],
+  "generationConfig": {
+    "temperature": 0.7,
+    "topP": 0.9,
+    "topK": 40,
+    "candidateCount": 1,
+    "maxOutputTokens": 1024,
+    "stopSequences": [
+      "string"
+    ],
+    "responseMimeType": "text/plain",
+    "responseJsonSchema": {
+      "additionalProp1": {}
+    },
+    "thinkingConfig": {
+      "include_thoughts": false
+    }
+  }
+}'
