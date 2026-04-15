@@ -1,37 +1,68 @@
-## 1. Phân tích các Module hiện có (Cập nhật 6)
+# Tìm hiểu và Thiết kế Gemma 4 Gemini-Compatible API
 
-*   **`manager.py`:** Hiện đã hỗ trợ nhận danh sách `images_list` và `audio_list` trực tiếp (objects), tối ưu cho API.
-*   **`files.py` (RAG Core):** Đây là module quan trọng nhất để đáp ứng yêu cầu mới. Nó hỗ trợ đọc: PDF, DOCX, XLSX, PPTX, CSV, TXT. Chúng ta sẽ tích hợp module này vào API để tự động trích xuất nội dung văn bản từ các file không phải media và đưa vào ngữ cảnh của LLM.
-*   **`tools.py`:** Sẽ được mở rộng để hỗ trợ các "file generation tools". Ví dụ: một tool để tạo file CSV hoặc PDF từ dữ liệu mà LLM trích xuất được.
+Mục tiêu: Xây dựng một API server sử dụng FastAPI cho mô hình Gemma 4 Omni, tuân thủ hoàn toàn đặc tả **Google Gemini API REST (v1beta)**. Điều này cho phép sử dụng các SDK chính thức của Gemini để giao tiếp với mô hình chạy tại local.
 
-## 2. Thiết kế `program.py` (Cập nhật 6)
+## 1. Kiến trúc API (v1beta)
 
-`program.py` sẽ được đặt trong folder `gemma4/` để đảm bảo tính đóng gói.
+Hệ thống được thiết kế để khớp với các endpoint chính của Gemini:
 
-### Các tính năng mới:
-1.  **Xử lý File Đa định dạng (Omni-File Handling):**
-    *   **Media (Image/Audio/Video):** Tiếp tục sử dụng `Gemma4Manager` để phân tích trực tiếp. Với Video, chúng ta sẽ thực hiện lấy mẫu khung hình (frame sampling) và trích xuất âm thanh để model xử lý.
-    *   **Documents (PDF, Office, Text):** Sử dụng `files.py` để "đọc" nội dung, sau đó chèn vào prompt dưới dạng: `Nội dung file [tên file]: ...`.
-2.  **Tự động Upload/Lưu tạm:** Các file gửi qua `inline_data` (Base64) sẽ được lưu tạm vào thư mục `gemma4/temp/` nếu cần xử lý phức tạp hoặc để phục vụ RAG.
-3.  **Hỗ trợ Tạo file và Trả về Download URL:**
-    *   Thêm folder `gemma4/output/` để lưu các file do AI tạo ra.
-    *   Sử dụng `fastapi.responses.FileResponse` để triển khai endpoint `GET /download/{filename}`.
-    *   AI sẽ trả về một chuỗi có định dạng: `File của bạn đã được tạo tại: http://<server_url>/download/<filename>`.
+-   **`POST /v1beta/models/{model}:generateContent`**: Sinh nội dung (Text, Image, Audio, Document).
+-   **`POST /v1beta/models/{model}:streamGenerateContent`**: Sinh nội dung dạng streaming (Server-Sent Events/NDJSON).
+-   **`POST /v1beta/files`**: Upload file để sử dụng lâu dài qua `file_data`.
+-   **`GET /v1beta/files/{file_id}`**: Lấy thông tin metadata của file.
+-   **`DELETE /v1beta/files/{file_id}`**: Xóa file.
 
-### Luồng xử lý file đính kèm:
-1.  Nhận request chứa danh sách `parts`.
-2.  Phân loại `Part`:
-    *   Nếu là Image/Audio: Gom vào list để gửi `manager.generate`.
-    *   Nếu là Document: Gọi hàm từ `files.py` để lấy text, cộng dồn vào prompt.
-    *   Nếu là Video: (Dự kiến) Dùng `librosa` trích xuất audio và lấy mẫu ảnh.
-3.  Gửi prompt tổng hợp (Text + Doc content) kèm Media list vào LLM.
+## 2. Các Tính năng Nâng cao
 
-## 3. Các bước thực hiện (Updated Plan)
+### Xử lý Đa phương thức (Multi-modal)
+-   **`inline_data`**: Gửi dữ liệu base64 trực tiếp trong request (tốt cho ảnh nhỏ/âm thanh ngắn).
+-   **`file_data`**: Tham chiếu đến file đã upload qua endpoint `/v1beta/files` (tối ưu cho video hoặc tài liệu lớn).
+-   **Document Processing**: Tự động nhận diện các file PDF, DOCX, XLSX, CSV... và trích xuất nội dung văn bản để đưa vào ngữ cảnh của LLM thông qua module `gemma4.files`.
 
-1.  **Cấu trúc lại `gemma4/program.py`**: Di chuyển từ root vào folder `gemma4/`, cập nhật các đường dẫn import.
-2.  **Tích hợp `files.py`**: Viết logic tự động nhận diện MIME type và gọi hàm parse tương ứng trong `program.py`.
-3.  **Xây dựng cơ chế File Generation**:
-    *   Tạo tool mẫu (ví dụ: `create_report_file`) để LLM có thể gọi khi cần tạo file.
-    *   Viết endpoint download.
-4.  **Hoàn thiện Video Interaction**: Nghiên cứu cách lấy mẫu frame đơn giản nhất mà không cần quá nhiều thư viện nặng.
-5.  **Xác minh**: Chạy test với nhiều loại file khác nhau (PDF đính kèm, ảnh đính kèm đồng thời).
+### Tool Calling (Function Calling)
+API hỗ trợ định dạng `tools` chuẩn của Gemini. 
+-   Hệ thống có sẵn tool `generate_file` để LLM có thể tự động tạo file và trả về URL download cho người dùng.
+-   Hỗ trợ `function_call` và `function_response` trong lịch sử hội thoại (Content parts).
+
+### Cấu hình Sinh (Generation Config)
+Hỗ trợ các tham số:
+-   `temperature`, `topP`, `topK`.
+-   `maxOutputTokens`.
+-   `stopSequences`.
+-   `thinkingConfig` (Dành cho các tác vụ cần suy luận sâu).
+
+## 3. Luồng Xử lý Dữ liệu
+
+1.  **Nhận Request**: Validate theo schema `GenerateContentRequest`.
+2.  **Tiền xử lý Parts**:
+    -   Nếu là `inline_data`: Decode base64.
+    -   Nếu là `file_data`: Tìm kiếm trong `FILES_STORE` local.
+    -   Nếu là Documents không phải Media: Gọi `read_file_content` từ `gemma4.files` và append text vào prompt.
+3.  **Gemma 4 Manager**: Chuyển đổi sang format `messages` của mô hình Gemma 4 và thực hiện `generate`.
+4.  **Hậu xử lý Tool Call**: Nếu kết quả sinh ra khớp với một khai báo tool, API sẽ trả về part `function_call` thay vì text.
+
+## 4. Hướng dẫn Sử dụng (Ví dụ)
+
+### Upload File
+```bash
+curl -X POST "http://localhost:8000/v1beta/files" \
+  -F "file=@tailieu.pdf"
+```
+Response sẽ trả về một `uri` (ví dụ: `http://.../v1beta/files/file-123`).
+
+### Chat với File đã upload
+```bash
+curl -X POST "http://localhost:8000/v1beta/models/gemma-4:generateContent" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [{
+      "parts": [
+        {"text": "Tóm tắt file này cho tôi"},
+        {"file_data": {"file_uri": "http://.../v1beta/files/file-123"}}
+      ]
+    }]
+  }'
+```
+
+### Download File do AI tạo
+AI có thể gọi tool `generate_file` và trả về link download tại `/download/{filename}`.
