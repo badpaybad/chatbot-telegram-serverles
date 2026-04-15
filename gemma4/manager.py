@@ -1,4 +1,5 @@
 import os
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 import torch
 import sys
 import threading
@@ -102,13 +103,14 @@ class Gemma4Manager:
                 load_in_4bit=True,
                 bnb_4bit_compute_dtype=torch.float32 if self.device == "cpu" else torch.bfloat16,
                 bnb_4bit_quant_type="nf4",
-                bnb_4bit_use_double_quant=True
+                bnb_4bit_use_double_quant=True,
+                llm_int8_enable_fp32_cpu_offload=True  # Hỗ trợ đẩy bớt một số layer sang CPU RAM
             )
 
             self.model = AutoModelForMultimodalLM.from_pretrained(
                 self.model_id,
                 config=config,
-                device_map=self.device,
+                device_map="auto",  # Rất quan trọng: cho phép tự động phân chia giữa GPU VRAM và CPU RAM
                 quantization_config=quantization_config,
                 trust_remote_code=True,
                 low_cpu_mem_usage=True
@@ -173,7 +175,7 @@ class Gemma4Manager:
             audio=final_audio, 
             sampling_rate=sampling_rate, 
             return_tensors="pt"
-        ).to(self.device)
+        ).to(self.model.device)
 
         with torch.no_grad():
             outputs = self.model.generate(
@@ -202,7 +204,7 @@ class Gemma4Manager:
             raise RuntimeError("Lỗi: Hệ thống AI chưa sẵn sàng.")
 
         # Chuẩn bị input cho text
-        inputs = self.processor(text=text, return_tensors="pt").to(self.device)
+        inputs = self.processor(text=text, return_tensors="pt").to(self.model.device)
         
         with torch.no_grad():
             # Yêu cầu trả về hidden states
@@ -248,7 +250,7 @@ class Gemma4Manager:
             
             # Sử dụng processor để xử lý ảnh
             # Đối với Gemma 4, cung cấp text="" để tránh lỗi NoneType trong processor.
-            inputs = self.processor(text="", images=image, return_tensors="pt").to(self.device)
+            inputs = self.processor(text="", images=image, return_tensors="pt").to(self.model.device)
             
             with torch.no_grad():
                 # Đường dẫn chính xác cho kiến trúc Gemma4: self.model.model.vision_tower
