@@ -91,7 +91,10 @@ All above run
 
 
               python -m venv venv
+
+              python3.12 -m venv venv
               source venv/bin/activate
+              pip install -r requirements.txt
 
 
               pip install --upgrade pip
@@ -103,6 +106,7 @@ All above run
               playwright install chromium
 
               python program.py 
+              python3.12 program.py 
 
                           INFO:     Waiting for application startup.
                           🚀 Server đang khởi động, bắt đầu đăng ký Webhook...
