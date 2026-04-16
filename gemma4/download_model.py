@@ -6,7 +6,7 @@ from huggingface_hub import snapshot_download
 # Define model and local paths
 MODEL_ID = "google/gemma-4-e4b-it"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-GEMMA_DIR = os.path.join(BASE_DIR, "model", "gemma-4-e4b-it")
+# Note: GEMMA_DIR is now dynamically determined in setup_gemma()
 KOKORO_DIR = os.path.join(BASE_DIR, "model", "kokoro")
 
 def download_file(url, dest_path):
@@ -48,23 +48,25 @@ def setup_kokoro():
         print("[-] Some Kokoro assets failed to download.")
     return success
 
-def setup_gemma():
-    print(f"\n[*] Checking/Setting up Gemma 4 ('{MODEL_ID}')...")
+def setup_gemma(repo_id=None):
+    target_id = repo_id or MODEL_ID
+    model_name = target_id.split("/")[-1]
+    gemma_dir = os.path.join(BASE_DIR, "model", model_name)
+    
+    print(f"\n[*] Checking/Setting up Gemma 4 ('{target_id}')...")
     
     # Check if some key file exists to skip download (e.g. config.json)
-    if os.path.exists(os.path.join(GEMMA_DIR, "config.json")):
-        print(f"[*] Gemma 4 already exists in '{GEMMA_DIR}'. Skipping download.")
+    if os.path.exists(os.path.join(gemma_dir, "config.json")):
+        print(f"[*] Gemma 4 already exists in '{gemma_dir}'. Skipping download.")
         return True
 
-    os.makedirs(GEMMA_DIR, exist_ok=True)
+    os.makedirs(gemma_dir, exist_ok=True)
     
     try:
         # snapshot_download will check cache and download missing files
-        # local_dir_use_symlinks is deprecated, so we omit it.
-        # trust_remote_code is not a valid argument for snapshot_download.
         path = snapshot_download(
-            repo_id=MODEL_ID,
-            local_dir=GEMMA_DIR
+            repo_id=target_id,
+            local_dir=gemma_dir
         )
         print(f"[+] Gemma 4 downloaded successfully to: {path}")
         return True

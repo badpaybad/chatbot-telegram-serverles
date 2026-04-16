@@ -49,26 +49,21 @@ class Gemma4Manager:
                 if cls._instance is None:
                     # Resolve priority path: 1. Local project, 2. HF cache, 3. Automated Setup
                     model_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "model")
-                    local_model_dir = os.path.join(model_root, "gemma-4-e4b-it")
-                    # cache_base = "/home/dunp/.cache/huggingface/hub/models--google--gemma-4-e4b-it/snapshots"
                     
-                    # 1. Prioritize Local Project Folder (as requested)
+                    # Tự động xác định thư mục local dựa trên tên model
+                    model_name = model_id.split("/")[-1]
+                    local_model_dir = os.path.join(model_root, model_name)
+                    
+                    # 1. Prioritize Local Project Folder
                     if os.path.isdir(local_model_dir) and os.path.exists(os.path.join(local_model_dir, "config.json")):
-                         print(f"[*] Using local project Gemma 4 model: {local_model_dir}")
+                         print(f"[*] Using local project model: {local_model_dir}")
                          model_id = local_model_dir
                     
-                    # # 2. Check HF Cache (Prio Offline) if local not found
-                    # elif os.path.exists(cache_base):
-                    #     subfolders = sorted([f for f in os.listdir(cache_base) if os.path.isdir(os.path.join(cache_base, f))])
-                    #     if subfolders:
-                    #         # Use the last one (often the most recent or only one)
-                    #         model_id = os.path.join(cache_base, subfolders[-1])
-                    #         print(f"[*] Found HF cache snapshot: {model_id}")
-
                     # 3. Trigger setup if absolutely nothing found
                     if not os.path.exists(os.path.join(local_model_dir, "config.json")) and (not os.path.isabs(model_id) or not os.path.exists(model_id)):
-                        print("[*] Gemma 4 model not found locally or in cache. Triggering automated setup...")
-                        setup_gemma()
+                        print(f"[*] Model {model_id} not found locally. Triggering automated setup...")
+                        from .download_model import setup_gemma
+                        setup_gemma(model_id)
                         if os.path.exists(os.path.join(local_model_dir, "config.json")):
                              model_id = local_model_dir
                     
@@ -117,30 +112,41 @@ class Gemma4Manager:
             print(f"[*] Instantiating model with 4-bit (NF4) quantization...")
             
             # Configure 4-bit quantization (NF4)
-            # NF4 is the standard and optimized 4-bit quantization for bitsandbytes on CPU.
+            # Optimized for ROCm and RDNA3 (780M)
             quantization_config = BitsAndBytesConfig(
                 load_in_4bit=True,
-                bnb_4bit_compute_dtype=torch.float32 if self.device == "cpu" else torch.float16,
+                bnb_4bit_compute_dtype=torch.float16, # RDNA3 (780M) is optimized for FP16
                 bnb_4bit_quant_type="nf4",
-                bnb_4bit_use_double_quant=True,
-                llm_int8_enable_fp32_cpu_offload=True  # Hỗ trợ đẩy bớt một số layer sang CPU RAM
+                bnb_4bit_use_double_quant=True
+                # Removed llm_int8_enable_fp32_cpu_offload which is less efficient for 4-bit
             )
+
+            import time
+            start_load = time.time()
+            print(f"[*] Starting weights loading (this may take a few minutes for 15GB)...")
 
             self.model = AutoModelForMultimodalLM.from_pretrained(
                 self.model_id,
                 config=config,
+                torch_dtype=torch.float16, # Explicitly use float16 for ROCm speed
                 device_map="auto" if self.device == "cuda" else None, 
-                quantization_config=quantization_config if self.device == "cuda" else None, # Skip bnb on CPU if it causes issues, or at least be careful
+                quantization_config=quantization_config if self.device == "cuda" else None,
                 trust_remote_code=True,
-                low_cpu_mem_usage=True if self.device == "cuda" else False
+                low_cpu_mem_usage=True,
+                attn_implementation="sdpa" # Modern attention implementation
             ).eval() 
             
-            # Force garbage collection and empty CUDA cache to free up intermediate buffers
+            load_duration = time.time() - start_load
+            print(f"[+] Weights loaded and quantized in {load_duration:.2f} seconds.")
+
+            # Force garbage collection and empty CUDA cache
             import gc
             gc.collect()
-            torch.cuda.empty_cache()
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
             
-            print(f"[+] Multimodal model {model_id} loaded successfully.")
+            print(f"[+] Multimodal model {model_id} initialization complete.")
+
         except Exception as e:
             print(f"[-] ERROR loading gemma4 model: {str(e)}")
             # Raise so the app knows it failed to initialize AI

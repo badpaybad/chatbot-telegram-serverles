@@ -100,8 +100,45 @@ Nếu model load rất chậm hoặc sinh text chậm (lag), hãy kiểm tra cá
 ### 5.2. Quantization
 Nên dùng NF4 (4-bit) để mô hình khớp hoàn toàn vào VRAM (UMA), tránh việc offload từng phần sang CPU sẽ làm giảm tốc độ xử lý multimodal (Audio/Image).
 
-### 5.3. Nhiệt độ
-Khi chạy Full Load, iGPU sẽ toả nhiệt chung với CPU, hãy đảm bảo hệ thống tản nhiệt được cung cấp đủ gió.
+### 5.4. Tối ưu tốc độ Load model (ROCm Specific)
+Khi load model lớn (như Gemma 4), việc thực hiện quantization on-the-fly (nén sang 4-bit lúc nạp) tiêu tốn rất nhiều tài nguyên CPU. Để tối ưu:
+
+- **Dùng Float16 làm Base**: Luôn truyền `torch_dtype=torch.float16` vào `from_pretrained`. Điều này giúp bộ nạp không phải chuyển đổi từ FP32 sang FP16 trước khi nén sang 4-bit.
+- **Tắt Offload 8-bit**: Nếu dùng 4-bit (NF4), hãy đảm bảo **không** bật `llm_int8_enable_fp32_cpu_offload`. Biến này chỉ dành cho 8-bit và có thể gây xung đột hoặc làm chậm quá trình nạp 4-bit.
+- **SDPA (Scaled Dot-Product Attention)**: Sử dụng `attn_implementation="sdpa"` để tận dụng các kernel tối ưu mặc định của PyTorch, giúp tăng tốc cả bước nạp và bước sinh text.
+- **Dọn dẹp bộ nhớ**: Sau khi nạp xong, hãy gọi `gc.collect()` và `torch.cuda.empty_cache()` để giải phóng các buffer trung gian.
+
+Ví dụ cấu hình nạp tối ưu trong `manager.py`:
+```python
+quantization_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_compute_dtype=torch.float16,
+    bnb_4bit_quant_type="nf4",
+    bnb_4bit_use_double_quant=True
+)
+
+model = AutoModelForMultimodalLM.from_pretrained(
+    model_id,
+    torch_dtype=torch.float16,
+    device_map="auto",
+    quantization_config=quantization_config,
+    low_cpu_mem_usage=True,
+    attn_implementation="sdpa"
+)
+### 5.5. Chuyển đổi giữa các phiên bản model (E2B vs E4B)
+Dòng Gemma 4 cung cấp nhiều kích thước khác nhau để cân bằng giữa chất lượng và tốc độ:
+
+- **E2B (Effective 2B)**: Nhẹ nhất, dung lượng 4-bit chỉ ~3GB. Tốc độ cực nhanh, phù hợp cho phản hồi thời gian thực.
+- **E4B (Effective 4B)**: Cân bằng nhất, dung lượng 4-bit ~4.5GB (nhưng file gốc 15GB). Chất lượng suy luận cao hơn E2B khoảng 10-15%.
+
+Để chuyển đổi, bạn chỉ cần thay đổi tham số `model_id` trong class `Gemma4Manager` tại file `manager.py`:
+
+```python
+# Trong gemma4/manager.py
+def __new__(cls, model_id: str = "google/gemma-4-e2b-it"): # Đổi thành e4b-it nếu muốn chất lượng cao hơn
+```
+
+Hệ thống sẽ tự động tạo thư mục riêng trong `gemma4/model/` cho từng phiên bản, tránh việc tải đè dữ liệu.
 
 ## 6. Theo dõi Bộ nhớ (VRAM & GTT)
 
