@@ -1,7 +1,23 @@
 import os
-os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
-import torch
 import sys
+
+# ROCm Optimization for Radeon 780M (gfx1102)
+# Using 11.0.0 as it is the most compatible target for GFX11 kernels
+os.environ["HSA_OVERRIDE_GFX_VERSION"] = "11.0.0"
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+
+# Add current directory to PATH so bitsandbytes can find our 'rocminfo' shim
+current_dir = os.path.dirname(os.path.abspath(__file__))
+os.environ["PATH"] = current_dir + os.pathsep + os.environ.get("PATH", "")
+
+# Point to bundled ROCm libraries in torch if they exist
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+torch_lib_path = os.path.join(project_root, "venv/lib/python3.12/site-packages/torch/lib")
+if os.path.exists(torch_lib_path):
+    os.environ["LD_LIBRARY_PATH"] = torch_lib_path + os.pathsep + os.environ.get("LD_LIBRARY_PATH", "")
+    os.environ["ROCM_PATH"] = torch_lib_path # bitsandbytes ROCm might look here
+
+import torch
 import threading
 import numpy as np
 from typing import List, Dict, Optional, Any, Union
@@ -9,7 +25,6 @@ from PIL import Image
 from transformers import AutoProcessor, AutoModelForMultimodalLM, AutoConfig, BitsAndBytesConfig
 
 # Import config based on project structure
-project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if project_root not in sys.path:
     sys.path.append(project_root)
 from config import *

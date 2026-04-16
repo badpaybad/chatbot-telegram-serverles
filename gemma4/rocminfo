@@ -1,0 +1,11 @@
+#!/bin/bash
+# Shim for missing rocminfo to satisfy bitsandbytes detection
+if [[ "$*" == "" ]]; then
+    # Default output for bitsandbytes detection
+    echo "ROCm System Management Interface"
+    echo "Name:                    gfx1102"
+    echo "Wavefront Size:          32(0x20)"
+else
+    # Handle other cases if needed, but bitsandbytes usually calls it without args
+    echo "ROCm System Management Interface shim"
+fi

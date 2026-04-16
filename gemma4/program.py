@@ -1,4 +1,10 @@
 import os
+
+# ROCm Optimization for Radeon 780M (gfx1102)
+# MUST set environment variables BEFORE importing torch or gemma4.manager
+os.environ["HSA_OVERRIDE_GFX_VERSION"] = "11.0.0"
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+
 import sys
 import base64
 import io

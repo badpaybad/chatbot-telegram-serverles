@@ -6,13 +6,30 @@ import io
 import datetime
 import json
 import time
+
+# ROCm Optimization for Radeon 780M (gfx1102)
+# MUST set environment variables BEFORE importing torch or gemma4.manager
+os.environ["HSA_OVERRIDE_GFX_VERSION"] = "11.0.0"
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+
+# Add the 'gemma4' directory to PATH so bitsandbytes can find our 'rocminfo' shim
+current_dir = os.path.dirname(os.path.abspath(__file__))
+gemma4_dir = os.path.join(current_dir, "gemma4")
+os.environ["PATH"] = gemma4_dir + os.pathsep + os.environ.get("PATH", "")
+
+# Point to bundled ROCm libraries in torch if they exist
+# Since gemma4lib.py is in the root, project_root is current_dir
+project_root = current_dir
+torch_lib_path = os.path.join(project_root, "venv/lib/python3.12/site-packages/torch/lib")
+if os.path.exists(torch_lib_path):
+    os.environ["LD_LIBRARY_PATH"] = torch_lib_path + os.pathsep + os.environ.get("LD_LIBRARY_PATH", "")
+    os.environ["ROCM_PATH"] = torch_lib_path
+
 from typing import List, Optional, Union, Dict, Any, Callable
 from pydantic import BaseModel, Field
 from PIL import Image
 
-# Thêm thư mục gốc vào path để import gemma4 modules
-current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(current_dir)
+# Ensure project_root is in path for imports
 if project_root not in sys.path:
     sys.path.append(project_root)
 
