@@ -63,8 +63,10 @@ os.environ["HSA_OVERRIDE_GFX_VERSION"] = "11.0.0"
 os.environ["HSA_ENABLE_SDMA"] = "1"      # Tăng tốc truyền dữ liệu CPU <-> iGPU
 os.environ["MIOPEN_DEBUG_DISABLE_FIND_DB"] = "1" # Bỏ qua bước tìm kiếm DB MIOpen chậm chạp
 os.environ["ROCM_RELAXED_ASIC_CHECK"] = "1"      # Tăng tính tương thích cho Mobile APU
-os.environ["TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL"] = "1" # Cho phép Flash Attention trên RDNA3
-os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+
+# Tối ưu hóa bộ nhớ cho iGPU 16GB UMA
+os.environ["TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL"] = "0" # Tắt JIT Compilation để tránh tốn RAM/VRAM lúc khởi động
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True,max_split_size_mb:128"
 
 # Thêm thư mục gemma4 vào PATH để nhận diện shim rocminfo
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -100,3 +102,31 @@ Nên dùng NF4 (4-bit) để mô hình khớp hoàn toàn vào VRAM (UMA), trán
 
 ### 5.3. Nhiệt độ
 Khi chạy Full Load, iGPU sẽ toả nhiệt chung với CPU, hãy đảm bảo hệ thống tản nhiệt được cung cấp đủ gió.
+
+## 6. Theo dõi Bộ nhớ (VRAM & GTT)
+
+Đối với iGPU, bộ nhớ được chia thành **VRAM (UMA)** (phần RAM hệ thống được BIOS cấp cứng cho GPU) và **GTT (Shared)** (phần RAM hệ thống GPU có thể mượn thêm).
+
+### 6.1. Kiểm tra nhanh qua Terminal
+Dùng lệnh sau để xem dung lượng đang dùng (đơn vị MB):
+```bash
+# Xem VRAM (UMA)
+echo "VRAM Used: $(cat /sys/class/drm/card1/device/mem_info_vram_used | awk '{print $1/1024/1024}') MB"
+echo "VRAM Total: $(cat /sys/class/drm/card1/device/mem_info_vram_total | awk '{print $1/1024/1024}') MB"
+
+# Xem GTT (Bộ nhớ dùng chung)
+echo "GTT Used: $(cat /sys/class/drm/card1/device/mem_info_gtt_used | awk '{print $1/1024/1024}') MB"
+echo "GTT Total: $(cat /sys/class/drm/card1/device/mem_info_gtt_total | awk '{print $1/1024/1024}') MB"
+```
+
+### 6.2. Công cụ giám sát trực quan
+Sử dụng **radeontop** để xem biểu đồ sử dụng thời gian thực:
+```bash
+sudo radeontop
+```
+
+Hoặc dùng **rocm-smi** với tuỳ chọn chi tiết:
+```bash
+rocm-smi --showmeminfo vram gtt
+```
+Nếu bạn thấy `VRAM Used` đã gần bằng `VRAM Total`, model sẽ bắt đầu tràn sang GTT hoặc Swap, gây ra hiện tượng lag nghiêm trọng hoặc lỗi Load model.

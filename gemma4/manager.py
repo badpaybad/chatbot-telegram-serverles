@@ -7,8 +7,8 @@ os.environ["HSA_OVERRIDE_GFX_VERSION"] = "11.0.0"
 os.environ["HSA_ENABLE_SDMA"] = "1" # Speeds up CPU-GPU transfers
 os.environ["MIOPEN_DEBUG_DISABLE_FIND_DB"] = "1" # Prevents slow MIOpen tuning lag
 os.environ["ROCM_RELAXED_ASIC_CHECK"] = "1" # Compatibility for mobile APUs
-os.environ["TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL"] = "1" # Enables Flash Attention/SDPA on RDNA3
-os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+os.environ["TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL"] = "0" # Disabled to reduce peak VRAM during startup
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True,max_split_size_mb:128"
 
 # Add current directory to PATH so bitsandbytes can find our 'rocminfo' shim
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -134,6 +134,11 @@ class Gemma4Manager:
                 trust_remote_code=True,
                 low_cpu_mem_usage=True if self.device == "cuda" else False
             ).eval() 
+            
+            # Force garbage collection and empty CUDA cache to free up intermediate buffers
+            import gc
+            gc.collect()
+            torch.cuda.empty_cache()
             
             print(f"[+] Multimodal model {model_id} loaded successfully.")
         except Exception as e:

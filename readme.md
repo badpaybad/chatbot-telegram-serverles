@@ -188,6 +188,9 @@ các tên db và bảng dùng sqllite chung cho cả project, có query json , d
 - LLM có thể là gemini hoặc ollama local
 - LLM có tool call hoặc function call để gọi các skill
 
+# gemma4 run in igpu 780M radeon 16gb
+
+ watch -n 1 rocm-smi
 
 # gemma4 run locally compatible with gemini api real
 

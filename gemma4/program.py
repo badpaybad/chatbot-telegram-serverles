@@ -6,8 +6,8 @@ os.environ["HSA_OVERRIDE_GFX_VERSION"] = "11.0.0"
 os.environ["HSA_ENABLE_SDMA"] = "1"
 os.environ["MIOPEN_DEBUG_DISABLE_FIND_DB"] = "1"
 os.environ["ROCM_RELAXED_ASIC_CHECK"] = "1"
-os.environ["TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL"] = "1"
-os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+os.environ["TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL"] = "0"
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True,max_split_size_mb:128"
 
 import sys
 import base64
