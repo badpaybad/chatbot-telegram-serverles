@@ -10,6 +10,10 @@ import time
 # ROCm Optimization for Radeon 780M (gfx1102)
 # MUST set environment variables BEFORE importing torch or gemma4.manager
 os.environ["HSA_OVERRIDE_GFX_VERSION"] = "11.0.0"
+os.environ["HSA_ENABLE_SDMA"] = "1"
+os.environ["MIOPEN_DEBUG_DISABLE_FIND_DB"] = "1"
+os.environ["ROCM_RELAXED_ASIC_CHECK"] = "1"
+os.environ["TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL"] = "1"
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
 # Add the 'gemma4' directory to PATH so bitsandbytes can find our 'rocminfo' shim

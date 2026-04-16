@@ -58,8 +58,12 @@ Trong mã nguồn (ví dụ `gemma4/manager.py`, `program.py`), bạn **PHẢI**
 import os
 import sys
 
-# Ép kiểu kiến trúc về gfx1100 (tương thích nhất cho RDNA3/780M trên ROCm 6.2)
+# Tối ưu cho iGPU 780M (RDNA3/gfx1103) trên ROCm 6.2
 os.environ["HSA_OVERRIDE_GFX_VERSION"] = "11.0.0"
+os.environ["HSA_ENABLE_SDMA"] = "1"      # Tăng tốc truyền dữ liệu CPU <-> iGPU
+os.environ["MIOPEN_DEBUG_DISABLE_FIND_DB"] = "1" # Bỏ qua bước tìm kiếm DB MIOpen chậm chạp
+os.environ["ROCM_RELAXED_ASIC_CHECK"] = "1"      # Tăng tính tương thích cho Mobile APU
+os.environ["TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL"] = "1" # Cho phép Flash Attention trên RDNA3
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
 # Thêm thư mục gemma4 vào PATH để nhận diện shim rocminfo
@@ -81,6 +85,18 @@ Chạy script kiểm tra sau:
 
 Nếu kết quả trả về `CUDA (ROCm) Available: True` và tên thiết bị là `AMD Radeon 780M`, hệ thống đã sẵn sàng.
 
-## 5. Lưu ý về hiệu năng
-- **Quantization**: Nên dùng NF4 hoặc INT4 để mô hình khớp hoàn toàn vào VRAM (UMA).
-- **Nhiệt độ**: Khi chạy Full Load, iGPU sẽ toả nhiệt chung với CPU, hãy đảm bảo tản nhiệt ổn định.
+## 5. Lưu ý về hiệu năng và Tối ưu
+
+### 5.1. Khắc phục tình trạng chạy chậm
+Nếu model load rất chậm hoặc sinh text chậm (lag), hãy kiểm tra các yếu tố sau:
+
+- **Áp lực bộ nhớ (RAM/Swap)**: iGPU dùng chung RAM hệ thống. Nếu RAM đầy, Linux sẽ đẩy dữ liệu vào **Swap (Disk)**, khiến tốc độ giảm hàng chục lần.
+    - **Cách xử lý**: Đóng các trình duyệt (Chrome/Firefox) hoặc các ứng dụng nặng để giải phóng ít nhất 16GB RAM trống trước khi chạy.
+- **Compute Dtype**: Hãy sử dụng `float16` thay vì `bfloat16`. Thử nghiệm cho thấy card RDNA3 (780M) xử lý FP16 nhanh hơn đáng kể trong các phiên bản ROCm hiện tại.
+- **UMA Buffer**: Phải vào BIOS cài đặt **UMA Frame Buffer Size** lên mức cao nhất (khuyên dùng **8GB** hoặc **16GB** nếu máy có 32GB RAM). Nếu để 2GB hoặc 4GB, model lớn sẽ bị lỗi hoặc chạy cực chậm.
+
+### 5.2. Quantization
+Nên dùng NF4 (4-bit) để mô hình khớp hoàn toàn vào VRAM (UMA), tránh việc offload từng phần sang CPU sẽ làm giảm tốc độ xử lý multimodal (Audio/Image).
+
+### 5.3. Nhiệt độ
+Khi chạy Full Load, iGPU sẽ toả nhiệt chung với CPU, hãy đảm bảo hệ thống tản nhiệt được cung cấp đủ gió.

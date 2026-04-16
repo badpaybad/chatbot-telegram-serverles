@@ -4,6 +4,10 @@ import sys
 # ROCm Optimization for Radeon 780M (gfx1102)
 # Using 11.0.0 as it is the most compatible target for GFX11 kernels
 os.environ["HSA_OVERRIDE_GFX_VERSION"] = "11.0.0"
+os.environ["HSA_ENABLE_SDMA"] = "1" # Speeds up CPU-GPU transfers
+os.environ["MIOPEN_DEBUG_DISABLE_FIND_DB"] = "1" # Prevents slow MIOpen tuning lag
+os.environ["ROCM_RELAXED_ASIC_CHECK"] = "1" # Compatibility for mobile APUs
+os.environ["TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL"] = "1" # Enables Flash Attention/SDPA on RDNA3
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
 # Add current directory to PATH so bitsandbytes can find our 'rocminfo' shim
@@ -91,9 +95,9 @@ class Gemma4Manager:
         print(f"[*] Loading Multimodal Model: {model_id} on {self.device}...")
         
         # Determine optimal dtype
-        # bfloat16 to optimize memory usage (half precision)
+        # float16 is often more stable and faster for inference on RDNA3 iGPUs
         if self.device == "cuda":
-            self.dtype = torch.bfloat16
+            self.dtype = torch.float16
         else:
             # CPU usually prefers float32, but bfloat16/float16 can save half memory
             # We'll use "auto" to let transformers choose based on safetensors
@@ -116,7 +120,7 @@ class Gemma4Manager:
             # NF4 is the standard and optimized 4-bit quantization for bitsandbytes on CPU.
             quantization_config = BitsAndBytesConfig(
                 load_in_4bit=True,
-                bnb_4bit_compute_dtype=torch.float32 if self.device == "cpu" else torch.bfloat16,
+                bnb_4bit_compute_dtype=torch.float32 if self.device == "cpu" else torch.float16,
                 bnb_4bit_quant_type="nf4",
                 bnb_4bit_use_double_quant=True,
                 llm_int8_enable_fp32_cpu_offload=True  # Hỗ trợ đẩy bớt một số layer sang CPU RAM

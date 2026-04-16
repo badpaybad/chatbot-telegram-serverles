@@ -3,6 +3,10 @@ import os
 # ROCm Optimization for Radeon 780M (gfx1102)
 # MUST set environment variables BEFORE importing torch or gemma4.manager
 os.environ["HSA_OVERRIDE_GFX_VERSION"] = "11.0.0"
+os.environ["HSA_ENABLE_SDMA"] = "1"
+os.environ["MIOPEN_DEBUG_DISABLE_FIND_DB"] = "1"
+os.environ["ROCM_RELAXED_ASIC_CHECK"] = "1"
+os.environ["TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL"] = "1"
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
 import sys
@@ -10,6 +14,7 @@ import base64
 import io
 import json
 import uuid
+import time
 import torch
 from typing import List, Optional, Union, Dict, Any
 from fastapi import FastAPI, HTTPException, Request, BackgroundTasks
@@ -98,6 +103,7 @@ class UsageMetadata(BaseModel):
     promptTokenCount: int = 0
     candidatesTokenCount: int = 0
     totalTokenCount: int = 0
+    elapsedTimeSeconds: Optional[float] = None
 
 class GenerateContentResponse(BaseModel):
     candidates: List[Candidate]
@@ -366,6 +372,7 @@ async def generate_content(request: GenerateContentRequest, req: Request, model:
 
     # 3. Thực hiện sinh text
     config = request.generationConfig or GenerationConfig()
+    start_time = time.time()
     try:
         response_text = manager.generate(
             input_data=gemma_msgs, 
@@ -375,10 +382,17 @@ async def generate_content(request: GenerateContentRequest, req: Request, model:
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Generation error: {str(e)}")
+    
+    elapsed = time.time() - start_time
 
     return GenerateContentResponse(
         candidates=[Candidate(content=Content(role="model", parts=[Part(text=response_text)]))],
-        usageMetadata=UsageMetadata(promptTokenCount=0, candidatesTokenCount=0, totalTokenCount=0)
+        usageMetadata=UsageMetadata(
+            promptTokenCount=0, 
+            candidatesTokenCount=0, 
+            totalTokenCount=0,
+            elapsedTimeSeconds=round(elapsed, 3)
+        )
     )
 
 @app.post("/v1beta/models/{model}:streamGenerateContent")
@@ -396,6 +410,7 @@ async def stream_generate_content(request: GenerateContentRequest, req: Request,
     async def event_generator():
         # Giả lập streaming bằng cách sinh toàn bộ text và chia nhỏ (do manager hiện tại không hỗ trợ stream generator)
         # Trong thực tế, manager.generate nên trả về một iterator
+        start_time = time.time()
         try:
             full_response = manager.generate(
                 input_data=gemma_msgs, 
@@ -403,6 +418,8 @@ async def stream_generate_content(request: GenerateContentRequest, req: Request,
                 images_list=images,
                 max_tokens=config.maxOutputTokens or 1024
             )
+            
+            elapsed = time.time() - start_time
             
             # Chia nhỏ text để giả lập stream
             words = full_response.split(" ")
@@ -413,9 +430,10 @@ async def stream_generate_content(request: GenerateContentRequest, req: Request,
                 )
                 yield json.dumps(chunk_resp.dict()) + "\n"
                 
-            # Gửi chunk cuối cùng với STOP
+            # Gửi chunk cuối cùng với STOP và thời gian thực hiện
             final_resp = GenerateContentResponse(
-                candidates=[Candidate(content=Content(role="model", parts=[Part(text="")]), finishReason="STOP")]
+                candidates=[Candidate(content=Content(role="model", parts=[Part(text="")]), finishReason="STOP")],
+                usageMetadata=UsageMetadata(elapsedTimeSeconds=round(elapsed, 3))
             )
             yield json.dumps(final_resp.dict()) + "\n"
         except Exception as e:
