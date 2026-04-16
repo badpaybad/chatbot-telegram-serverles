@@ -167,3 +167,21 @@ Hoặc dùng **rocm-smi** với tuỳ chọn chi tiết:
 rocm-smi --showmeminfo vram gtt
 ```
 Nếu bạn thấy `VRAM Used` đã gần bằng `VRAM Total`, model sẽ bắt đầu tràn sang GTT hoặc Swap, gây ra hiện tượng lag nghiêm trọng hoặc lỗi Load model.
+
+## 7. Quay lại dùng CPU (Reverting to CPU)
+
+Nếu bạn muốn quay lại sử dụng CPU (ví dụ khi iGPU 780M không đủ nhanh hoặc bạn muốn giải phóng RAM hệ thống từ UMA), hãy thực hiện các bước sau trong file `gemma4/manager.py`:
+
+1.  **Vô hiệu hóa biến môi trường ROCm**: Comment out các dòng `os.environ` liên quan đến `HSA_OVERRIDE_GFX_VERSION`, `MIOPEN`, v.v.
+2.  **Ép buộc thiết bị CPU**: Thay đổi `self.device = "cpu"` trong hàm `_load_model`.
+3.  **Vô hiệu hóa Quantization**: Đặt `quantization_config=None` và `device_map=None` khi gọi `from_pretrained`.
+4.  **Điều chỉnh Dtype**: Sử dụng `torch.bfloat16` để tối ưu bộ nhớ trên CPU (Gemma 4 sẽ chiếm khoảng 15GB RAM).
+
+Mã nguồn trong `gemma4/manager.py` đã được cấu hình sẵn với các dòng comment để bạn có thể dễ dàng chuyển đổi qua lại bằng cách comment/uncomment.
+
+### Kiểm tra chế độ CPU
+Chạy lệnh:
+```bash
+python test/test_gemma4_cpu_check.py config_dunp
+```
+Kết quả mong muốn: `Device: cpu` và model phản hồi được văn bản.

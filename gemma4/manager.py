@@ -1,25 +1,25 @@
 import os
 import sys
 
-# ROCm Optimization for Radeon 780M (gfx1102)
+# ROCm Optimization for Radeon 780M (gfx1102) - DISABLED (Back to CPU)
 # Using 11.0.0 as it is the most compatible target for GFX11 kernels
-os.environ["HSA_OVERRIDE_GFX_VERSION"] = "11.0.0"
-os.environ["HSA_ENABLE_SDMA"] = "1" # Speeds up CPU-GPU transfers
-os.environ["MIOPEN_DEBUG_DISABLE_FIND_DB"] = "1" # Prevents slow MIOpen tuning lag
-os.environ["ROCM_RELAXED_ASIC_CHECK"] = "1" # Compatibility for mobile APUs
-os.environ["TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL"] = "0" # Disabled to reduce peak VRAM during startup
-os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True,max_split_size_mb:128"
+# os.environ["HSA_OVERRIDE_GFX_VERSION"] = "11.0.0"
+# os.environ["HSA_ENABLE_SDMA"] = "1" # Speeds up CPU-GPU transfers
+# os.environ["MIOPEN_DEBUG_DISABLE_FIND_DB"] = "1" # Prevents slow MIOpen tuning lag
+# os.environ["ROCM_RELAXED_ASIC_CHECK"] = "1" # Compatibility for mobile APUs
+# os.environ["TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL"] = "0" # Disabled to reduce peak VRAM during startup
+# os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True,max_split_size_mb:128"
 
 # Add current directory to PATH so bitsandbytes can find our 'rocminfo' shim
 current_dir = os.path.dirname(os.path.abspath(__file__))
-os.environ["PATH"] = current_dir + os.pathsep + os.environ.get("PATH", "")
+# os.environ["PATH"] = current_dir + os.pathsep + os.environ.get("PATH", "")
 
 # Point to bundled ROCm libraries in torch if they exist
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-torch_lib_path = os.path.join(project_root, "venv/lib/python3.12/site-packages/torch/lib")
-if os.path.exists(torch_lib_path):
-    os.environ["LD_LIBRARY_PATH"] = torch_lib_path + os.pathsep + os.environ.get("LD_LIBRARY_PATH", "")
-    os.environ["ROCM_PATH"] = torch_lib_path # bitsandbytes ROCm might look here
+# torch_lib_path = os.path.join(project_root, "venv/lib/python3.12/site-packages/torch/lib")
+# if os.path.exists(torch_lib_path):
+#     os.environ["LD_LIBRARY_PATH"] = torch_lib_path + os.pathsep + os.environ.get("LD_LIBRARY_PATH", "")
+#     os.environ["ROCM_PATH"] = torch_lib_path # bitsandbytes ROCm might look here
 
 import torch
 import threading
@@ -84,8 +84,9 @@ class Gemma4Manager:
 
     def _load_model(self, model_id: str):
         self.model_id = model_id
-        # Automatically detect device
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        # Automatically detect device - FORCED TO CPU
+        # self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.device = "cpu"
         
         print(f"[*] Loading Multimodal Model: {model_id} on {self.device}...")
         
@@ -109,28 +110,28 @@ class Gemma4Manager:
             
             # Load model with memory-efficient settings
             # low_cpu_mem_usage=True: Only load weights when needed, reduces peak RAM
-            print(f"[*] Instantiating model with 4-bit (NF4) quantization...")
+            # print(f"[*] Instantiating model with 4-bit (NF4) quantization...")
             
-            # Configure 4-bit quantization (NF4)
+            # Configure 4-bit quantization (NF4) - DISABLED ON CPU
             # Optimized for ROCm and RDNA3 (780M)
-            quantization_config = BitsAndBytesConfig(
-                load_in_4bit=True,
-                bnb_4bit_compute_dtype=torch.float16, # RDNA3 (780M) is optimized for FP16
-                bnb_4bit_quant_type="nf4",
-                bnb_4bit_use_double_quant=True
-                # Removed llm_int8_enable_fp32_cpu_offload which is less efficient for 4-bit
-            )
+            # quantization_config = BitsAndBytesConfig(
+            #     load_in_4bit=True,
+            #     bnb_4bit_compute_dtype=torch.float16, # RDNA3 (780M) is optimized for FP16
+            #     bnb_4bit_quant_type="nf4",
+            #     bnb_4bit_use_double_quant=True
+            #     # Removed llm_int8_enable_fp32_cpu_offload which is less efficient for 4-bit
+            # )
 
             import time
             start_load = time.time()
-            print(f"[*] Starting weights loading (this may take a few minutes for 15GB)...")
+            print(f"[*] Starting weights loading (approx 15GB, this may take a few minutes on CPU)...")
 
             self.model = AutoModelForMultimodalLM.from_pretrained(
                 self.model_id,
                 config=config,
-                torch_dtype=torch.float16, # Explicitly use float16 for ROCm speed
-                device_map="auto" if self.device == "cuda" else None, 
-                quantization_config=quantization_config if self.device == "cuda" else None,
+                torch_dtype=torch.bfloat16, # bfloat16 is generally better for modern CPU inference
+                device_map=None, 
+                quantization_config=None,
                 trust_remote_code=True,
                 low_cpu_mem_usage=True,
                 attn_implementation="sdpa" # Modern attention implementation
