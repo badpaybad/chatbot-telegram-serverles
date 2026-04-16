@@ -110,10 +110,10 @@ class Gemma4Manager:
             self.model = AutoModelForMultimodalLM.from_pretrained(
                 self.model_id,
                 config=config,
-                device_map="auto",  # Rất quan trọng: cho phép tự động phân chia giữa GPU VRAM và CPU RAM
-                quantization_config=quantization_config,
+                device_map="auto" if self.device == "cuda" else None, 
+                quantization_config=quantization_config if self.device == "cuda" else None, # Skip bnb on CPU if it causes issues, or at least be careful
                 trust_remote_code=True,
-                low_cpu_mem_usage=True
+                low_cpu_mem_usage=True if self.device == "cuda" else False
             ).eval() 
             
             print(f"[+] Multimodal model {model_id} loaded successfully.")

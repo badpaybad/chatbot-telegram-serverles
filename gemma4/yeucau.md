@@ -20,3 +20,4 @@ https://ai.google.dev/gemini-api/docs/file-input-methods#rest
 
 **guide làm prompt**
 https://ai.google.dev/gemini-api/docs/prompting-strategies
+
