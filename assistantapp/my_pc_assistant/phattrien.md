@@ -20,39 +20,28 @@ Tuân thủ yêu cầu chia tách rõ ràng:
 - `lib/models/`: Định nghĩa các đối tượng dữ liệu.
 - `lib/utils/`: Các hàm tiện ích.
 
-## Công nghệ & Thư viện sử dụng - [HOÀN THÀNH]
-- **State Management**: `provider` (theo gợi ý trong README).
-- **Typography**: `google_fonts` (sử dụng font Inter hoặc Roboto).
-- **Icons**: `Material Icons` và `Font Awesome`.
-- **Authentication**: `local_auth` cho tính năng vân tay.
-- **HTTP Client**: `dio` (đã có trong pubspec.yaml).
+## Công nghệ & Thư viện sử dụng - [CẬP NHẬT]
+- **State Management**: `provider`.
+- **Firebase Ecosystem**: 
+    - `firebase_core`: Khởi tạo Firebase.
+    - `firebase_messaging` (FCM): Nhận thông báo đẩy trên Android/iOS.
+    - `cloud_firestore`: Cơ sở dữ liệu NoSQL.
+    - `firebase_database`: Realtime Database.
+    - `firebase_analytics`: Phân tích dữ liệu.
+- **Biometrics**: `local_auth` (Vân tay, Khuôn mặt - FaceID).
+- **Connectivity**: `flutter_blue_plus` cho tương tác Bluetooth.
+- **HTTP Client**: `dio`.
 
-## Lộ trình thực hiện
+## Lộ trình thực hiện (Tiếp theo)
 
-### Bước 1: Khởi tạo & Cấu trúc - [HOÀN THÀNH]
-- Cập nhật `pubspec.yaml` với các thư viện cần thiết.
-- Thiết lập hệ thống thư mục.
-- Cấu hình Global Theme (Colors, TextStyles) và Navigation (Routes).
+### Bước 6: Tích hợp Firebase & Notification
+- Cấu hình khởi tạo Firebase trong `main.dart`.
+- Xây dựng `NotificationService` để xử lý FCM (foreground, background, terminated).
+- Thiết lập `FirestoreService` và `RealtimeDatabaseService`.
 
-### Bước 2: Phát triển UI Cơ bản & Mock Data - [HOÀN THÀNH]
-- Xây dựng các Widget nhỏ: `CustomTextField`, `CustomButton`, `CreditCardWidget`, `FeatureItem`.
-- Tạo Mock API Service (`AuthService`) để xử lý đăng nhập và đăng ký.
-
-### Bước 3: Màn hình Sign In & Sign Up - [HOÀN THÀNH]
-- Triển khai giao diện theo thiết kế `Sign in.png` và `Sign up #2.png`.
-- Tích hợp tính năng xác thực vân tay bằng `local_auth`.
-- Xử lý logic chuyển trang và validate form.
-
-### Bước 4: Màn hình Home (Dashboard) - [HOÀN THÀNH]
-- Triển khai giao diện theo thiết kế `Home.png`.
-- Header với ảnh đại diện và thông báo.
-- Widget thẻ tín dụng với hiệu ứng gradient cao cấp.
-- Lưới các chức năng (Grid 3x3) với các icon màu sắc.
-- Thanh điều hướng phía dưới (Bottom Navigation Bar).
-
-### Bước 5: Hoàn thiện & Tối ưu - [ĐANG THỰC HIỆN]
-- Đảm bảo layout responsive trên các kích thước màn hình Android.
-- Kiểm tra lại toàn bộ luồng điều hướng và logic xác thực.
+### Bước 7: Tương tác Phần cứng (Bluetooth & Biometrics)
+- Xây dựng `BluetoothService` để quét và kết nối thiết bị.
+- Hoàn thiện logic `LocalAuthService` cho cả FaceID (iOS) và vân tay (Android).
 
 ---
 **Tiến độ hiện tại: 95%**

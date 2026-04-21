@@ -1,14 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'core/app_theme.dart';
 import 'core/app_routes.dart';
 import 'services/auth_service.dart';
+import 'services/notification_service.dart';
+import 'services/bluetooth_service.dart';
+import 'services/database_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Khởi tạo Firebase (Yêu cầu file cấu hình google-services.json / GoogleService-Info.plist)
+  try {
+    await Firebase.initializeApp();
+  } catch (e) {
+    debugPrint('Firebase initialization failed: $e');
+    debugPrint('Vui lòng thêm file cấu hình Firebase để sử dụng đầy đủ tính năng.');
+  }
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthService()),
+        ChangeNotifierProvider(create: (_) => NotificationService()),
+        ChangeNotifierProvider(create: (_) => BluetoothService()),
+        ChangeNotifierProvider(create: (_) => DatabaseService()),
       ],
       child: const MyApp(),
     ),
