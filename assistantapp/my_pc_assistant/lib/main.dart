@@ -21,20 +21,32 @@ late ObjectBox objectbox;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Khởi tạo Local Storage (SharedPreferences)
-  await LocalStorageService.init();
+  debugPrint('App starting initialization...');
 
-  // Khởi tạo ObjectBox (Vector Database)
-  objectbox = await ObjectBox.create();
-  
-  // Khởi tạo Firebase (Yêu cầu file cấu hình google-services.json / GoogleService-Info.plist)
   try {
-    await Firebase.initializeApp();
+    // Khởi tạo Local Storage (SharedPreferences)
+    debugPrint('Initializing SharedPreferences...');
+    await LocalStorageService.init();
+    debugPrint('SharedPreferences initialized.');
+
+    // Khởi tạo ObjectBox (Vector Database)
+    debugPrint('Initializing ObjectBox...');
+    objectbox = await ObjectBox.create();
+    debugPrint('ObjectBox initialized.');
+    
+    // Khởi tạo Firebase
+    debugPrint('Initializing Firebase...');
+    await Firebase.initializeApp().timeout(const Duration(seconds: 5), onTimeout: () {
+      debugPrint('Firebase initialization timed out.');
+      return Firebase.app(); // Return default app if already exists or just continue
+    });
+    debugPrint('Firebase initialized.');
   } catch (e) {
-    debugPrint('Firebase initialization failed: $e');
-    debugPrint('Vui lòng thêm file cấu hình Firebase để sử dụng đầy đủ tính năng.');
+    debugPrint('Initialization error: $e');
+    // Tiếp tục chạy app ngay cả khi có lỗi khởi tạo (để hiển thị UI thông báo lỗi sau)
   }
 
+  debugPrint('Running app...');
   runApp(
     MultiProvider(
       providers: [

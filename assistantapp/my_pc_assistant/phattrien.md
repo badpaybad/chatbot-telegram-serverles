@@ -62,6 +62,12 @@ Tuân thủ yêu cầu chia tách rõ ràng:
 - Sử dụng `ObjectBox` làm Vector Database hỗ trợ lưu trữ embedding cho AI (Gemma4, FastText).
 - Đảm bảo dữ liệu được duy trì khi khởi động lại ứng dụng.
 
+### Bước 11: Kiểm thử tự động (Automation Testing) - [ĐANG TRIỂN KHAI]
+- Tích hợp `integration_test` để kiểm tra luồng UI chính.
+- Viết test cho màn hình SignIn, SignUp và điều hướng Home.
+- Chạy test tự động trên emulator để đảm bảo tính ổn định.
+- Ghi lại quá trình test để kiểm tra lỗi (nếu có).
+
 --- 
 Lưu ý quan trọng:
 Để các tính năng Firebase hoạt động, bạn cần thực hiện bước cuối cùng là thêm các tệp cấu hình từ Firebase Console:

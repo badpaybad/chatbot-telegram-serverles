@@ -11,8 +11,21 @@ class ObjectBox {
 
   /// Create an instance of ObjectBox to use throughout the app.
   static Future<ObjectBox> create() async {
-    final docsDir = await getApplicationDocumentsDirectory();
-    final store = await openStore(directory: p.join(docsDir.path, "obx-db"));
-    return ObjectBox._create(store);
+    try {
+      print('ObjectBox: Getting documents directory...');
+      final docsDir = await getApplicationDocumentsDirectory();
+      print('ObjectBox: Docs dir: ${docsDir.path}');
+      
+      final dbPath = p.join(docsDir.path, "obx-db");
+      print('ObjectBox: Opening store at $dbPath ...');
+      
+      final store = await openStore(directory: dbPath);
+      print('ObjectBox: Store opened successfully.');
+      
+      return ObjectBox._create(store);
+    } catch (e) {
+      print('ObjectBox: Error in create(): $e');
+      rethrow;
+    }
   }
 }
