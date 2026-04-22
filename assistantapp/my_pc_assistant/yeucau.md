@@ -3,7 +3,7 @@ tìm hiểu kỹ và đưa ra cách làm vào phattrien.md với các yêu cầu
 - Sử dụng ngôn ngữ tiếng việt để viết, giải thích, trình bày, tài liệu tất cả
 - App phải chạy được như thiết kế với đầy đủ các chức năng được thể hiện trong ảnh
 - Ưu tiên sử dụng các tính năng của flutter và android native có sẵng nếu không có thể tự tạo
-- Cập nhật phattrien.md môĩ lần có yêu cầu mới từ yeucau.md 
+- **bắt buộc** Cập nhật phattrien.md môĩ lần có yêu cầu mới từ yeucau.md 
 - xem thêm README.md để biết build, debug, chạy và một số suggest về package
 - **chú ý** cập nhật code xong cần **tự động** mở emulator nếu chưa và **tự động** chạy command vd [flutter emulators --launch Medium_Phone_API_27] or [flutter run -d emulator-5554] để test và sửa lỗi nếu có
 Cần phân tích và làm việc sau cho code flutter
