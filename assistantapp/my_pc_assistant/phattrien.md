@@ -43,6 +43,9 @@ Tuân thủ yêu cầu chia tách rõ ràng:
 - Xây dựng `BluetoothService` để quét và kết nối thiết bị.
 - Hoàn thiện logic `LocalAuthService` cho cả FaceID (iOS) và vân tay (Android).
 
----
-**Tiến độ hiện tại: 95%**
-Dự án đã cơ bản hoàn thành tất cả các chức năng và giao diện theo thiết kế. Bạn có thể chạy ứng dụng bằng lệnh `flutter run`.
+--- 
+Lưu ý quan trọng:
+Để các tính năng Firebase hoạt động, bạn cần thực hiện bước cuối cùng là thêm các tệp cấu hình từ Firebase Console:
+
+Thêm google-services.json vào thư mục android/app/.
+Thêm GoogleService-Info.plist vào thư mục ios/Runner/.

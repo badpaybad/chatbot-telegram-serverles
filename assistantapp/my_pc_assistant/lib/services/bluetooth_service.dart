@@ -22,7 +22,9 @@ class BluetoothService extends ChangeNotifier {
     var subscription = FlutterBluePlus.onScanResults.listen((results) {
       _scanResults = results;
       notifyListeners();
-    }, onError: (e) => if (kDebugMode) print(e));
+    }, onError: (e) {
+      if (kDebugMode) print(e);
+    });
 
     // Bắt đầu quét
     await FlutterBluePlus.startScan(timeout: const Duration(seconds: 15));
@@ -38,7 +40,7 @@ class BluetoothService extends ChangeNotifier {
   }
 
   Future<void> connectToDevice(BluetoothDevice device) async {
-    await device.connect();
+    await device.connect(license: License.free);
     if (kDebugMode) print("Connected to ${device.platformName}");
   }
 

@@ -4,9 +4,9 @@ tìm hiểu kỹ và đưa ra cách làm vào phattrien.md với các yêu cầu
 - App phải chạy được như thiết kế với đầy đủ các chức năng được thể hiện trong ảnh
 - Ưu tiên sử dụng các thư viện của flutter và android native
 - ưu tiên sử dụng các tính năng của flutter và android native có sẵng nếu không có thể tự tạo
-- Cập nhật phattrien.md liên tục với tiến độ thực hiện 
+- Cập nhật phattrien.md môĩ lần có yêu cầu mới từ yeucau.md 
 - xem thêm README.md để biết build, debug, chạy và một số suggest về package
-- 
+- cập nhật code xong cần chạy command [flutter run -d emulator-5556 ] để test và sửa lỗi nếu có
 Cần phân tích và làm việc sau cho code flutter
 FE UI của app:
 - cần bố cục layout
