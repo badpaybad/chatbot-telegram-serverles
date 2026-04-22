@@ -11,9 +11,21 @@ import 'services/theme_service.dart';
 import 'services/biometric_service.dart';
 import 'services/nfc_service.dart';
 import 'services/connectivity_service.dart';
+import 'services/local_storage_service.dart';
+import 'services/file_service.dart';
+import 'services/vector_db_service.dart';
+import 'core/objectbox.dart';
+
+late ObjectBox objectbox;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Khởi tạo Local Storage (SharedPreferences)
+  await LocalStorageService.init();
+
+  // Khởi tạo ObjectBox (Vector Database)
+  objectbox = await ObjectBox.create();
   
   // Khởi tạo Firebase (Yêu cầu file cấu hình google-services.json / GoogleService-Info.plist)
   try {
@@ -26,14 +38,20 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => LocalStorageService()),
+        ChangeNotifierProxyProvider<LocalStorageService, ThemeService>(
+          create: (context) => ThemeService(context.read<LocalStorageService>()),
+          update: (context, storage, theme) => theme ?? ThemeService(storage),
+        ),
         ChangeNotifierProvider(create: (_) => AuthService()),
         ChangeNotifierProvider(create: (_) => NotificationService()),
         ChangeNotifierProvider(create: (_) => BluetoothService()),
         ChangeNotifierProvider(create: (_) => DatabaseService()),
-        ChangeNotifierProvider(create: (_) => ThemeService()),
         ChangeNotifierProvider(create: (_) => BiometricService()),
         ChangeNotifierProvider(create: (_) => NfcService()),
         ChangeNotifierProvider(create: (_) => ConnectivityService()),
+        ChangeNotifierProvider(create: (_) => FileService()),
+        ChangeNotifierProvider(create: (_) => VectorDbService(objectbox)),
       ],
       child: const MyApp(),
     ),

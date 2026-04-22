@@ -56,6 +56,12 @@ Tuân thủ yêu cầu chia tách rõ ràng:
 - Đã xây dựng `NotificationService` để xử lý FCM.
 - Đã xây dựng `DatabaseService` để tương tác với Firestore và Realtime Database.
 
+### Bước 10: Lưu trữ dữ liệu cục bộ & Vector Database - [HOÀN THÀNH]
+- Tích hợp `shared_preferences` cho cấu hình người dùng (theme, cài đặt cá nhân).
+- Tích hợp `path_provider` để quản lý tệp tin, ảnh chụp và bộ nhớ tạm (cache).
+- Sử dụng `ObjectBox` làm Vector Database hỗ trợ lưu trữ embedding cho AI (Gemma4, FastText).
+- Đảm bảo dữ liệu được duy trì khi khởi động lại ứng dụng.
+
 --- 
 Lưu ý quan trọng:
 Để các tính năng Firebase hoạt động, bạn cần thực hiện bước cuối cùng là thêm các tệp cấu hình từ Firebase Console:

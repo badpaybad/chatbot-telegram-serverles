@@ -17,3 +17,6 @@ FE UI của app:
 - Những thao tác cần tương tác BE qua api cần viết mock api và data cho FE sử dụng, sau này tích hợp với BE thật thông qua hàm fetch api 
 - Bổ xung việc nhận notification từ google FCM cho cả android và ios, dùng thư viện của firebase realtime, firestore, thư việc về tương tác bluetooh, vân tay, khuôn mặt, nfc, wifi, 5g, 4g ...
 - UI cần định nghĩa thêm việc theme change: màu sáng và màu tối cho app.
+
+**cập nhật 2026-04-22 09:09:09**
+cần lưu dữ liệu không quan trọng xuống ổ cứng, như cấu hình về hiển thị cá nhân, các dữ liệu tạm thời, cache, hoặc nhận diện khuôn mặt, chụp ảnh, files ... để khi khởi động lại app không bị mất dữ liệu và có thể sử dụng lại được. chọn package có hỗ trợ về vector database để dùng gemma4 hoặc fasttext, faiss ...
