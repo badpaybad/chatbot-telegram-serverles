@@ -47,6 +47,8 @@ dependencies:
   firebase_database: ^11.3.10
   flutter_blue_plus: ^2.2.1
   firebase_analytics: ^11.6.0
+  nfc_manager: ^3.3.0
+  connectivity_plus: ^6.1.0
 
 dev_dependencies:
   flutter_test:

@@ -15,4 +15,9 @@ class AppColors {
   static const Color accentOrange = Color(0xFFFFB703);
   static const Color accentGreen = Color(0xFF06D6A0);
   static const Color accentBlue = Color(0xFF118AB2);
+
+  // Dark Mode colors
+  static const Color darkBackground = Color(0xFF121212);
+  static const Color darkSurface = Color(0xFF1E1E1E);
+  static const Color darkGrey = Color(0xFF333333);
 }

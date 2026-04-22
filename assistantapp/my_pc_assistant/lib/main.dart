@@ -7,6 +7,10 @@ import 'services/auth_service.dart';
 import 'services/notification_service.dart';
 import 'services/bluetooth_service.dart';
 import 'services/database_service.dart';
+import 'services/theme_service.dart';
+import 'services/biometric_service.dart';
+import 'services/nfc_service.dart';
+import 'services/connectivity_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,6 +30,10 @@ void main() async {
         ChangeNotifierProvider(create: (_) => NotificationService()),
         ChangeNotifierProvider(create: (_) => BluetoothService()),
         ChangeNotifierProvider(create: (_) => DatabaseService()),
+        ChangeNotifierProvider(create: (_) => ThemeService()),
+        ChangeNotifierProvider(create: (_) => BiometricService()),
+        ChangeNotifierProvider(create: (_) => NfcService()),
+        ChangeNotifierProvider(create: (_) => ConnectivityService()),
       ],
       child: const MyApp(),
     ),
@@ -37,10 +45,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeService = context.watch<ThemeService>();
+
     return MaterialApp(
       title: 'My PC Assistant',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeService.themeMode,
       initialRoute: AppRoutes.initialRoute,
       routes: AppRoutes.routes,
     );

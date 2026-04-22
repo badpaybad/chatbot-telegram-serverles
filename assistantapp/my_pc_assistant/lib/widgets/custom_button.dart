@@ -22,8 +22,8 @@ class CustomButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: isLoading ? null : onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: color ?? AppColors.primary,
-        foregroundColor: textColor ?? AppColors.white,
+        backgroundColor: color ?? Theme.of(context).colorScheme.primary,
+        foregroundColor: textColor ?? Theme.of(context).colorScheme.onPrimary,
       ),
       child: isLoading
           ? const SizedBox(

@@ -29,19 +29,32 @@ Tuân thủ yêu cầu chia tách rõ ràng:
     - `firebase_database`: Realtime Database.
     - `firebase_analytics`: Phân tích dữ liệu.
 - **Biometrics**: `local_auth` (Vân tay, Khuôn mặt - FaceID).
-- **Connectivity**: `flutter_blue_plus` cho tương tác Bluetooth.
+- **Bluetooth**: `flutter_blue_plus`.
+- **NFC**: `nfc_manager`.
+- **Connectivity**: `connectivity_plus` (Wifi, 4G, 5G).
 - **HTTP Client**: `dio`.
 
 ## Lộ trình thực hiện (Tiếp theo)
 
-### Bước 6: Tích hợp Firebase & Notification
+### Bước 6: Tích hợp Firebase & Notification - [HOÀN THÀNH]
 - Cấu hình khởi tạo Firebase trong `main.dart`.
 - Xây dựng `NotificationService` để xử lý FCM (foreground, background, terminated).
-- Thiết lập `FirestoreService` và `RealtimeDatabaseService`.
+- Thiết lập `DatabaseService` cho Firestore và Realtime Database.
 
-### Bước 7: Tương tác Phần cứng (Bluetooth & Biometrics)
+### Bước 7: Tương tác Phần hardware (Bluetooth, Biometrics, NFC, Connectivity) - [HOÀN THÀNH]
 - Xây dựng `BluetoothService` để quét và kết nối thiết bị.
-- Hoàn thiện logic `LocalAuthService` cho cả FaceID (iOS) và vân tay (Android).
+- Xây dựng `BiometricService` hỗ trợ vân tay và FaceID thông qua `local_auth`.
+- Xây dựng `NfcService` xử lý tương tác NFC.
+- Xây dựng `ConnectivityService` theo dõi trạng thái mạng (Wifi, 4G, 5G).
+
+### Bước 8: Đa giao diện (Light/Dark Mode) - [HOÀN THÀNH]
+- Đã định nghĩa `darkTheme` trong `app_theme.dart`.
+- Quản lý trạng thái thông qua `ThemeService` (Provider).
+- Tích hợp nút chuyển đổi nhanh trên giao diện chính.
+
+### Bước 9: Tích hợp Firebase (FCM, Firestore, Realtime) - [HOÀN THÀNH]
+- Đã xây dựng `NotificationService` để xử lý FCM.
+- Đã xây dựng `DatabaseService` để tương tác với Firestore và Realtime Database.
 
 --- 
 Lưu ý quan trọng:

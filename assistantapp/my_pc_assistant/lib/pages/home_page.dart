@@ -4,6 +4,7 @@ import '../core/app_colors.dart';
 import '../widgets/credit_card_widget.dart';
 import '../widgets/feature_item.dart';
 import '../services/auth_service.dart';
+import '../services/theme_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -20,7 +21,7 @@ class _HomePageState extends State<HomePage> {
     final user = context.watch<AuthService>().currentUser;
 
     return Scaffold(
-      backgroundColor: AppColors.primary,
+      backgroundColor: Theme.of(context).colorScheme.primary,
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -52,6 +53,15 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
                   const Spacer(),
+                  IconButton(
+                    icon: Icon(
+                      context.watch<ThemeService>().isDarkMode 
+                        ? Icons.light_mode 
+                        : Icons.dark_mode,
+                      color: AppColors.white,
+                    ),
+                    onPressed: () => context.read<ThemeService>().toggleTheme(),
+                  ),
                   Stack(
                     children: [
                       const Icon(Icons.notifications_none, color: AppColors.white, size: 30),
@@ -79,9 +89,9 @@ class _HomePageState extends State<HomePage> {
             Expanded(
               child: Container(
                 width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: AppColors.background,
-                  borderRadius: BorderRadius.only(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.background,
+                  borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(40),
                     topRight: Radius.circular(40),
                   ),
