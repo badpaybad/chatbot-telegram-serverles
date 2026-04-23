@@ -34,7 +34,7 @@ Tuân thủ yêu cầu chia tách rõ ràng:
 - **Connectivity**: `connectivity_plus` (Wifi, 4G, 5G).
 - **HTTP Client**: `dio`.
 
-## Lộ trình thực hiện (Tiếp theo)
+## Lộ trình thực hiện (Tiếp theo)  
 
 ### Bước 6: Tích hợp Firebase & Notification - [HOÀN THÀNH]
 - Cấu hình khởi tạo Firebase trong `main.dart`.
@@ -56,17 +56,24 @@ Tuân thủ yêu cầu chia tách rõ ràng:
 - Đã xây dựng `NotificationService` để xử lý FCM.
 - Đã xây dựng `DatabaseService` để tương tác với Firestore và Realtime Database.
 
-### Bước 10: Lưu trữ dữ liệu cục bộ & Vector Database - [HOÀN THÀNH]
+### Bước 10: Lưu trữ dữ liệu cục bộ & Media (Microphone, Camera) - [HOÀN THÀNH]
 - Tích hợp `shared_preferences` cho cấu hình người dùng (theme, cài đặt cá nhân).
 - Tích hợp `path_provider` để quản lý tệp tin, ảnh chụp và bộ nhớ tạm (cache).
 - Sử dụng `ObjectBox` làm Vector Database hỗ trợ lưu trữ embedding cho AI (Gemma4, FastText).
+- Đã bổ sung `MediaService` hỗ trợ ghi âm (Microphone) và chụp ảnh (Camera).
+- Cập nhật `AndroidManifest.xml` với các quyền `RECORD_AUDIO` và `CAMERA`.
 - Đảm bảo dữ liệu được duy trì khi khởi động lại ứng dụng.
 
-### Bước 11: Kiểm thử tự động (Automation Testing) - [ĐANG TRIỂN KHAI]
+### Bước 11: Tích hợp Native Custom & Vector Search Demo - [HOÀN THÀNH]
+- Đã thêm Method Channel vào `MainActivity.kt` để lấy thông tin hệ thống trực tiếp từ Android Native.
+- Xây dựng `HardwarePage` để kiểm tra các tính năng phần cứng: Bluetooth, NFC, Biometrics, Connectivity.
+- Xây dựng `VectorSearchPage` để trình diễn khả năng tìm kiếm tương đồng (Similarity Search) sử dụng ObjectBox.
+- Hoàn thiện điều hướng từ màn hình chính tới các tính năng native.
+
+### Bước 12: Kiểm thử tự động (Automation Testing) - [ĐANG TRIỂN KHAI]
 - Tích hợp `integration_test` để kiểm tra luồng UI chính.
-- Viết test cho màn hình SignIn, SignUp và điều hướng Home.
 - Chạy test tự động trên emulator để đảm bảo tính ổn định.
-- Ghi lại quá trình test để kiểm tra lỗi (nếu có).
+- Tự động chạy emulator và ứng dụng thông qua command line.
 
 --- 
 Lưu ý quan trọng:

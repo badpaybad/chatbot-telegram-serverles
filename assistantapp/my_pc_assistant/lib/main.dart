@@ -14,6 +14,8 @@ import 'services/connectivity_service.dart';
 import 'services/local_storage_service.dart';
 import 'services/file_service.dart';
 import 'services/vector_db_service.dart';
+import 'services/device_service.dart';
+import 'services/media_service.dart';
 import 'core/objectbox.dart';
 
 late ObjectBox objectbox;
@@ -64,6 +66,8 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ConnectivityService()),
         ChangeNotifierProvider(create: (_) => FileService()),
         ChangeNotifierProvider(create: (_) => VectorDbService(objectbox)),
+        ChangeNotifierProvider(create: (_) => DeviceService()),
+        ChangeNotifierProvider(create: (_) => MediaService()),
       ],
       child: const MyApp(),
     ),

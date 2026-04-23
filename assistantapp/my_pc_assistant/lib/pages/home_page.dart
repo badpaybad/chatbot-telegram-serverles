@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../core/app_colors.dart';
+import '../core/app_routes.dart';
 import '../widgets/credit_card_widget.dart';
 import '../widgets/feature_item.dart';
 import '../services/auth_service.dart';
@@ -113,16 +114,28 @@ class _HomePageState extends State<HomePage> {
                         crossAxisCount: 3,
                         mainAxisSpacing: 20,
                         crossAxisSpacing: 20,
-                        children: const [
-                          FeatureItem(title: 'Account and Card', icon: Icons.account_balance_wallet, color: Colors.blue),
-                          FeatureItem(title: 'Transfer', icon: Icons.swap_horiz, color: Colors.red),
-                          FeatureItem(title: 'Withdraw', icon: Icons.account_balance, color: Colors.blueAccent),
-                          FeatureItem(title: 'Mobile prepaid', icon: Icons.phone_android, color: Colors.orange),
-                          FeatureItem(title: 'Pay the bill', icon: Icons.receipt_long, color: Colors.teal),
-                          FeatureItem(title: 'Save online', icon: Icons.savings, color: Colors.indigo),
-                          FeatureItem(title: 'Credit card', icon: Icons.credit_card, color: Colors.orange),
-                          FeatureItem(title: 'Transaction report', icon: Icons.assessment, color: Colors.blue),
-                          FeatureItem(title: 'Beneficiary', icon: Icons.person_pin, color: Colors.pink),
+                        children: [
+                          FeatureItem(
+                            title: 'Hardware Dashboard', 
+                            icon: Icons.developer_mode, 
+                            color: Colors.blue,
+                            onTap: () => Navigator.pushNamed(context, AppRoutes.hardware),
+                          ),
+                          FeatureItem(
+                            title: 'AI Vector Search', 
+                            icon: Icons.psychology, 
+                            color: Colors.purple,
+                            onTap: () => Navigator.pushNamed(context, AppRoutes.vectorSearch),
+                          ),
+                          const FeatureItem(title: 'Account and Card', icon: Icons.account_balance_wallet, color: Colors.blue),
+                          const FeatureItem(title: 'Transfer', icon: Icons.swap_horiz, color: Colors.red),
+                          const FeatureItem(title: 'Withdraw', icon: Icons.account_balance, color: Colors.blueAccent),
+                          const FeatureItem(title: 'Mobile prepaid', icon: Icons.phone_android, color: Colors.orange),
+                          const FeatureItem(title: 'Pay the bill', icon: Icons.receipt_long, color: Colors.teal),
+                          const FeatureItem(title: 'Save online', icon: Icons.savings, color: Colors.indigo),
+                          const FeatureItem(title: 'Credit card', icon: Icons.credit_card, color: Colors.orange),
+                          const FeatureItem(title: 'Transaction report', icon: Icons.assessment, color: Colors.blue),
+                          const FeatureItem(title: 'Beneficiary', icon: Icons.person_pin, color: Colors.pink),
                         ],
                       ),
                     ],
