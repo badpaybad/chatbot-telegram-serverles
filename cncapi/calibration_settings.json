@@ -16,7 +16,7 @@
   "axis_dir_x": 1,
   "axis_dir_y": -1,
   "mm_per_px": 0.0846774193548387,
-  "home_set": true,
+  "home_set": false,
   "workpiece_origin": {
     "x": 0.0,
     "y": 0.0,
